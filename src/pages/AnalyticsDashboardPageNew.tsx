@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -10,6 +11,7 @@ import {
 export default function AnalyticsDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [qrId] = useState('qr-d83ac423');
+  
   const [stats, setStats] = useState<any>(null);
   const [timeseries, setTimeseries] = useState<any>(null);
   const [geographic, setGeographic] = useState<any>(null);
@@ -18,10 +20,6 @@ export default function AnalyticsDashboardPage() {
   const [ctaButtons, setCtaButtons] = useState<any>(null);
   const [referrers, setReferrers] = useState<any>(null);
   const [funnel, setFunnel] = useState<any>(null);
-
-  useEffect(() => {
-    loadAnalytics();
-  }, []);
 
   const loadAnalytics = async () => {
     setLoading(true);
@@ -53,6 +51,11 @@ export default function AnalyticsDashboardPage() {
     }
   };
 
+  useEffect(() => {
+    loadAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
@@ -66,11 +69,6 @@ export default function AnalyticsDashboardPage() {
 
   const mobilePercentage = devices?.byDeviceType ? 
     ((devices.byDeviceType.find((d: any) => d.deviceType === 'mobile')?.count || 0) / stats?.totalevents * 100).toFixed(0) 
-    : '0';
-
-  // Calculate engagement metrics
-  const engagementRate = ctaButtons?.totalViews > 0 
-    ? ((ctaButtons.totalButtonClicks / ctaButtons.totalViews) * 100).toFixed(1)
     : '0';
 
   return (
