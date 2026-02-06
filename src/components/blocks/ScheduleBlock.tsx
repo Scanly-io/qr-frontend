@@ -90,7 +90,7 @@ function formatTime(time: string): string {
   return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
 }
 
-export default function ScheduleBlock({ block, theme, isEditing = false, onUpdate }: ScheduleBlockProps) {
+export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
   console.log('ScheduleBlock rendering', { block, theme });
   
   // Payment context for pre-authorization

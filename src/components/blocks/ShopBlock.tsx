@@ -90,7 +90,6 @@ export default function ShopBlock({
   const accentColor = (style?.accentColor as string) || '#8b5cf6';
   const textColor = (style?.textColor as string) || '#1f2937';
   const borderRadius = (style?.borderRadius as string) || 'rounded-2xl';
-  const cardStyle = (style?.cardStyle as string) || 'elevated'; // elevated, flat, bordered
 
   // Cart state
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -256,14 +255,6 @@ export default function ShopBlock({
       case 'HOT': return <Zap className="w-3 h-3" />;
       case 'BEST': return <Heart className="w-3 h-3" />;
       default: return null;
-    }
-  };
-
-  const getCardClasses = () => {
-    switch (cardStyle) {
-      case 'flat': return 'bg-muted/30';
-      case 'bordered': return 'border-2 border-border bg-transparent';
-      default: return 'bg-white shadow-md hover:shadow-lg';
     }
   };
 
