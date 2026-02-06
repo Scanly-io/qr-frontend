@@ -49,7 +49,7 @@ export default function DashboardPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [filterMode, setFilterMode] = useState<FilterMode>('all');
+  const [filterMode] = useState<FilterMode>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {

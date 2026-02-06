@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Plus, QrCode, Eye, Edit, Trash2, Copy, MoreVertical, Grid, List, Search, Filter, Calendar, TrendingUp } from 'lucide-react';
+import { Plus, QrCode, Eye, Edit, Trash2 } from 'lucide-react';
 import { micrositeApi } from '../lib/api';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from '@/components/ui';
 
 interface Microsite {
   id: string;
@@ -14,18 +12,12 @@ interface Microsite {
   updatedAt: string;
 }
 
-type ViewMode = 'grid' | 'list';
-type FilterMode = 'all' | 'published' | 'draft';
-
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const [microsites, setMicrosites] = useState<Microsite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [filterMode, setFilterMode] = useState<FilterMode>('all');
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     console.log('🏠 Dashboard mounted, auth status:', {

@@ -1,47 +1,53 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { analyticsApi } from '@/lib/api';
-import { format } from 'date-fns';
 import {
   Calendar, TrendingUp, Users, MapPin, Smartphone, Clock,
-  MousePointer, Globe, Monitor, ExternalLink, Activity
+  MousePointer, Globe, Monitor
 } from 'lucide-react';
 
 export default function AnalyticsDashboardPage() {
   const { id } = useParams<{ id: string }>();
   const qrId = id || 'demo-qr';
   const [loading, setLoading] = useState(true);
-  const [dateRange] = useState({
-    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-    end: new Date()
-  });
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [stats, setStats] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [timeseries, setTimeseries] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [geographic, setGeographic] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [devices, setDevices] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [patterns, setPatterns] = useState<any>(null);
-  const [ctaButtons, setCtaButtons] = useState<any>(null);
-  const [referrers, setReferrers] = useState<any>(null);
 
-  useEffect(() => {
-    loadAnalytics();
-  }, []);
+  // Color constants for charts
+  const COLORS = {
+    violet: '#8b5cf6',
+    indigo: '#6366f1',
+    purple: '#a855f7',
+    emerald: '#10b981',
+    teal: '#14b8a6',
+    green: '#22c55e',
+    blue: '#3b82f6',
+    sky: '#0ea5e9',
+    cyan: '#06b6d4',
+  };
 
   const loadAnalytics = async () => {
     setLoading(true);
     try {
-      const [summaryRes, timeseriesRes, geoRes, devicesRes, patternsRes, ctaRes, referrersRes] =
+      const [summaryRes, timeseriesRes, geoRes, devicesRes, patternsRes] =
         await Promise.all([
           analyticsApi.getSummary(qrId),
           analyticsApi.getTimeseries(qrId),
           analyticsApi.getGeography(qrId),
           analyticsApi.getDevices(qrId),
           analyticsApi.getPatterns(qrId),
-          analyticsApi.getCTAButtons(qrId),
-          analyticsApi.getReferrers(qrId)
         ]);
 
       setStats(summaryRes);
@@ -49,8 +55,6 @@ export default function AnalyticsDashboardPage() {
       setGeographic(geoRes);
       setDevices(devicesRes);
       setPatterns(patternsRes);
-      setCtaButtons(ctaRes);
-      setReferrers(referrersRes);
     } catch (error) {
       console.error('Failed to load analytics:', error);
     } finally {
@@ -58,26 +62,10 @@ export default function AnalyticsDashboardPage() {
     }
   };
 
-  const DEVICE_COLORS = {
-    mobile: '#8b5cf6',    // violet
-    desktop: '#6366f1',   // indigo
-    tablet: '#a855f7',    // purple
-  };
-
-  const OS_COLORS = {
-    iOS: '#10b981',       // emerald
-    Android: '#22c55e',   // green
-    Windows: '#0ea5e9',   // sky
-    macOS: '#06b6d4',     // cyan
-    iPadOS: '#14b8a6',    // teal
-  };
-
-  const BROWSER_COLORS = {
-    Safari: '#3b82f6',    // blue
-    Chrome: '#f59e0b',    // amber
-    Edge: '#0ea5e9',      // sky
-    Firefox: '#ef4444',   // red
-  };
+  useEffect(() => {
+    loadAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (
@@ -169,6 +157,7 @@ export default function AnalyticsDashboardPage() {
               <p className="text-3xl font-bold text-slate-900">
                 {(
                   ((devices?.byDeviceType?.find(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (d: any) => d.deviceType === 'Mobile'
                   )?.count || 0) /
                     (stats?.totalScans || 1)) *
@@ -297,6 +286,7 @@ export default function AnalyticsDashboardPage() {
                   label
                 >
                   {(devices?.byDeviceType || []).map(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (_: any, index: number) => (
                       <Cell
                         key={`cell-${index}`}
@@ -332,7 +322,9 @@ export default function AnalyticsDashboardPage() {
                   outerRadius={80}
                   label
                 >
-                  {(devices?.byOS || []).map((_: any, index: number) => (
+                  {(devices?.byOS || []).map(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (_: any, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={
@@ -362,7 +354,9 @@ export default function AnalyticsDashboardPage() {
                   outerRadius={80}
                   label
                 >
-                  {(devices?.byBrowser || []).map((_: any, index: number) => (
+                  {(devices?.byBrowser || []).map(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (_: any, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={
@@ -407,7 +401,9 @@ export default function AnalyticsDashboardPage() {
               </div>
             </div>
             <div className="space-y-3">
-              {(geographic?.byCountry || []).slice(0, 8).map((country: any, index: number) => (
+              {(geographic?.byCountry || []).slice(0, 8).map(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (country: any, index: number) => (
               <div
                 key={index}
                 className="flex items-center justify-between p-4 rounded-lg bg-slate-50"
