@@ -6,6 +6,7 @@ export default function StripeConnectPage() {
   const navigate = useNavigate();
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [accountStatus, setAccountStatus] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,6 +58,7 @@ export default function StripeConnectPage() {
       if (data.url) {
         window.location.href = data.url;
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'Failed to connect Stripe account');
       setIsConnecting(false);
