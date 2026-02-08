@@ -23,7 +23,7 @@ import type { PageTheme } from '@/types/theme';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import { usePayment } from '@/contexts/PaymentContext';
-import { shadows, animations } from '@/utils/designSystem';
+import {shadows, animations} from '@/utils/designSystem';
 
 interface ProductBlockProps {
   block: Block;

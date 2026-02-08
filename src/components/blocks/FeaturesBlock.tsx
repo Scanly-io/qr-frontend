@@ -3,7 +3,14 @@ import type { PageTheme } from '@/types/theme';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { Check, ArrowRight, Sparkles, Star, Zap, Shield, Rocket, Heart, Gift, Crown, Target, Gem, Award } from 'lucide-react';
+import {
+  Check, ArrowRight, Sparkles, Star, Zap, Shield, Rocket, Heart, Gift, Crown, Target, Gem, Award,
+  // Extended icon set for templates
+  Palette, MessageCircle, Truck, CheckCircle, Globe, TrendingUp, Key, Waves, Film, Wine,
+  Utensils, Dumbbell, Car, Home, Video, Briefcase, MapPin, Settings, BarChart, Users,
+  Leaf, RefreshCw, Bed, Phone, ShieldCheck, DollarSign, Calendar, FileText, GraduationCap,
+  Search, Compass, Sliders, Package, Headphones,
+} from 'lucide-react';
 import { spacing, shadows, animations } from '@/utils/designSystem';
 
 interface FeaturesBlockProps {
@@ -20,8 +27,9 @@ interface Feature {
   highlight?: boolean;
 }
 
-// Icon mapping for lucide icons
+// Comprehensive icon mapping — covers all icons used in industry templates
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  // Core set
   check: Check,
   sparkles: Sparkles,
   star: Star,
@@ -34,6 +42,46 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?:
   target: Target,
   gem: Gem,
   award: Award,
+  // Extended set for templates
+  palette: Palette,
+  'message-circle': MessageCircle,
+  truck: Truck,
+  'check-circle': CheckCircle,
+  globe: Globe,
+  'trending-up': TrendingUp,
+  key: Key,
+  waves: Waves,
+  film: Film,
+  wine: Wine,
+  utensils: Utensils,
+  dumbbell: Dumbbell,
+  car: Car,
+  home: Home,
+  video: Video,
+  briefcase: Briefcase,
+  'map-pin': MapPin,
+  settings: Settings,
+  'bar-chart': BarChart,
+  users: Users,
+  leaf: Leaf,
+  refresh: RefreshCw,
+  'refresh-cw': RefreshCw,
+  bed: Bed,
+  phone: Phone,
+  'shield-check': ShieldCheck,
+  'dollar-sign': DollarSign,
+  calendar: Calendar,
+  'file-text': FileText,
+  'graduation-cap': GraduationCap,
+  search: Search,
+  compass: Compass,
+  sliders: Sliders,
+  package: Package,
+  headphones: Headphones,
+  // Common aliases
+  location: MapPin,
+  presentation: BarChart,
+  chart: BarChart,
 };
 
 // Helper to determine if background is dark
@@ -97,8 +145,6 @@ export default function FeaturesBlock({ block, theme }: FeaturesBlockProps) {
     const convertedIcon = icon && emojiToLucide[icon] ? emojiToLucide[icon] : icon;
     const iconKey = convertedIcon?.toLowerCase()?.trim();
     const LucideIcon = iconKey && ICON_MAP[iconKey];
-    
-    console.log('FeaturesBlock renderIcon:', { icon, iconKey, hasLucideIcon: !!LucideIcon, availableIcons: Object.keys(ICON_MAP) });
     
     if (LucideIcon) {
       return <LucideIcon className={sizeMap[size]} style={{ color }} />;
@@ -274,14 +320,17 @@ export default function FeaturesBlock({ block, theme }: FeaturesBlockProps) {
             >
               {/* Simple animated icon */}
               <motion.div 
-                className="text-2xl"
+                className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{
+                  background: `${primaryColor}12`,
+                }}
                 animate={{ 
                   scale: hoveredIndex === idx ? 1.2 : 1,
                   rotate: hoveredIndex === idx ? 10 : 0 
                 }}
                 transition={{ type: 'spring', stiffness: 400 }}
               >
-                {feature.icon || '✨'}
+                {renderIcon(feature.icon, primaryColor, 'md')}
               </motion.div>
               
               {/* Content */}
@@ -453,7 +502,7 @@ export default function FeaturesBlock({ block, theme }: FeaturesBlockProps) {
                 <div className="relative flex items-center gap-4">
                   {/* Icon with gradient border */}
                   <motion.div 
-                    className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
+                    className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center"
                     style={{
                       background: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.8)',
                       boxShadow: `0 4px 15px ${gradient.from}30`,
@@ -461,7 +510,7 @@ export default function FeaturesBlock({ block, theme }: FeaturesBlockProps) {
                     animate={{ rotate: hoveredIndex === idx ? 5 : 0 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
-                    {feature.icon || '✨'}
+                    {renderIcon(feature.icon, gradient.from, 'lg')}
                   </motion.div>
                   
                   {/* Content */}
@@ -549,9 +598,7 @@ export default function FeaturesBlock({ block, theme }: FeaturesBlockProps) {
                       rotate: hoveredIndex === idx ? 5 : 0 
                     }}
                   >
-                    <span className={isLarge ? 'text-3xl' : 'text-2xl'}>
-                      {feature.icon || '✨'}
-                    </span>
+                    {renderIcon(feature.icon, feature.color || primaryColor, isLarge ? 'lg' : 'md')}
                   </motion.div>
                   
                   {/* Content */}
@@ -703,7 +750,11 @@ export default function FeaturesBlock({ block, theme }: FeaturesBlockProps) {
                 : 'bg-white border-zinc-100 hover:border-zinc-200 hover:shadow-lg'
             }`}
           >
-            <div className="flex-shrink-0 text-2xl">{feature.icon || '✨'}</div>
+            <div className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center"
+              style={{ background: `${primaryColor}12` }}
+            >
+              {renderIcon(feature.icon, primaryColor, 'lg')}
+            </div>
             <div className="flex-1">
               <h3 
                 className="text-base font-semibold"

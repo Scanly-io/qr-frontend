@@ -334,7 +334,7 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
               }`}
               style={{
                 backgroundColor: hoveredTrack === idx || currentTrack === idx ? cardBg : 'transparent',
-                ringColor: primaryColor,
+                borderColor: primaryColor,
               }}
             >
               {/* Track number / Play icon */}

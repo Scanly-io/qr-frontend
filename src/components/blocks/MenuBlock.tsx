@@ -14,7 +14,7 @@ import {
   borders, 
   animations, 
   getCardStyles,
-  getPrimaryShadow
+  getPrimaryShadow,
 } from '../../utils/designSystem';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { usePayment } from '@/contexts/PaymentContext';
@@ -129,7 +129,7 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
   const { 
     addToCart: addToPaymentCart, 
     cart: paymentCart, 
-    updateQuantity
+    updateQuantity, 
   } = usePayment();
 
   // Configuration

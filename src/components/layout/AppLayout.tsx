@@ -10,7 +10,8 @@ import {
   Plus,
   User,
   Bell,
-  Search
+  Search,
+  BarChart3,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
@@ -36,10 +37,10 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
       current: location.pathname === '/dashboard'
     },
     {
-      name: 'QR Codes',
-      href: '/qr-codes',
-      icon: QrCode,
-      current: location.pathname.startsWith('/qr-codes')
+      name: 'Analytics',
+      href: '/analytics',
+      icon: BarChart3,
+      current: location.pathname === '/analytics'
     },
     {
       name: 'Settings',
@@ -79,7 +80,7 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
                 <QrCode className="w-5 h-5 text-white" />
               </div>
               <span className="hidden sm:inline text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                QR Microsite
+                Scanly
               </span>
             </Link>
           </div>

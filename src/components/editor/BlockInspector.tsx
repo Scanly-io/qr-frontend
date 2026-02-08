@@ -164,11 +164,6 @@ interface BlockInspectorProps {
 // CONSTANTS
 // ============================================
 
-const COLOR_PRESETS = [
-  '#000000', '#1F2937', '#374151', '#6B7280', '#9CA3AF', '#D1D5DB', '#F3F4F6', '#FFFFFF',
-  '#DC2626', '#F97316', '#EAB308', '#22C55E', '#14B8A6', '#3B82F6', '#8B5CF6', '#EC4899',
-];
-
 // Font options - use IDs that match FONT_FAMILY_MAP
 const FONT_OPTIONS = [
   { label: 'Inter', value: 'inter' },
@@ -227,12 +222,14 @@ function Section({
   children, 
   defaultOpen = true,
   badge,
+  tooltip,
 }: { 
   title: string; 
   icon?: React.ElementType; 
   children: React.ReactNode;
   defaultOpen?: boolean;
   badge?: string;
+  tooltip?: string;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
@@ -292,6 +289,14 @@ function Section({
           transition={{ duration: 0.2 }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: spacing[5] }}>
+            {tooltip && (
+              <div className="flex items-start gap-2 px-3 py-2 bg-violet-50 border border-violet-200 rounded-xl">
+                <svg className="w-4 h-4 text-violet-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <span className="text-xs text-violet-700 leading-relaxed">{tooltip}</span>
+              </div>
+            )}
             {children}
           </div>
         </motion.div>
@@ -395,9 +400,9 @@ function NumberField({
     <div>
       <label className="block text-sm font-bold text-stone-700 mb-2.5 flex items-center gap-2">
         {Icon ? (
-          <Icon className="w-3.5 h-3.5 text-blue-600" />
+          <Icon className="w-3.5 h-3.5 text-violet-600" />
         ) : (
-          <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500" />
+          <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-violet-500 to-purple-500" />
         )}
         {label}
       </label>
@@ -409,7 +414,7 @@ function NumberField({
           min={min}
           max={max}
           step={step}
-          className="w-full px-3 py-2 text-sm text-stone-800 bg-white border-2 border-blue-200 rounded-xl placeholder:text-stone-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 focus:shadow-glow-violet focus:outline-none transition-all shadow-sm hover:shadow-md"
+          className="w-full px-3 py-2 text-sm text-stone-800 bg-white border-2 border-violet-200 rounded-xl placeholder:text-stone-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 focus:outline-none transition-all shadow-sm hover:shadow-md"
         />
         {suffix && (
           <span className="px-3 py-2 text-sm font-semibold text-stone-600 bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg border border-stone-300 shadow-sm whitespace-nowrap">
@@ -436,13 +441,13 @@ function SelectField({
   return (
     <div>
       <label className="block text-sm font-bold text-stone-700 mb-2.5 flex items-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" />
+        <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-violet-500 to-purple-500" />
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full h-11 px-4 py-2.5 text-sm font-medium text-stone-800 bg-white border-2 border-emerald-200 rounded-xl focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:shadow-glow-violet focus:outline-none transition-all cursor-pointer shadow-md hover:shadow-lg appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDFMNiA2TDExIDEiIHN0cm9rZT0iIzc4NzE2QyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==')] bg-[length:12px] bg-[right_1rem_center] bg-no-repeat"
+        className="w-full h-11 px-4 py-2.5 text-sm font-medium text-stone-800 bg-white border-2 border-violet-200 rounded-xl focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 focus:outline-none transition-all cursor-pointer shadow-md hover:shadow-lg appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDFMNiA2TDExIDEiIHN0cm9rZT0iIzc4NzE2QyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==')] bg-[length:12px] bg-[right_1rem_center] bg-no-repeat"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value} className="bg-white text-stone-800 py-2">{opt.label}</option>
@@ -767,7 +772,7 @@ function AlignmentField({
             className={cn(
               'flex-1 p-2.5 rounded-md transition-all',
               value === opt.value 
-                ? 'bg-violet-600 text-stone-800 shadow' 
+                ? 'bg-violet-600 text-white shadow' 
                 : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100'
             )}
           >
@@ -802,7 +807,7 @@ function ButtonGroup({
             className={cn(
               'px-3 py-2 text-xs font-semibold rounded-lg border transition-all',
               value === opt.value 
-                ? 'bg-violet-600 text-stone-800 border-violet-500' 
+                ? 'bg-violet-600 text-white border-violet-500' 
                 : 'bg-white text-stone-600 border-stone-300 hover:border-violet-500 hover:text-stone-800'
             )}
           >
@@ -891,7 +896,7 @@ function ImageField({
           />
           <button
             onClick={() => onChange('')}
-            className="absolute top-2 right-2 p-1.5 bg-red-500 text-stone-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
           >
             <X className="w-4 h-4" />
           </button>
@@ -1896,7 +1901,7 @@ function ProfileEditor({ block, updateContent }: {
 }) {
   return (
     <>
-      <Section title="Profile Info" icon={Type} defaultOpen={true}>
+      <Section title="Profile Info" icon={Type} defaultOpen={true} tooltip="Your profile card appears at the top of your page. Add a photo and bio to make a great first impression.">
         <ImageField
           label="Avatar"
           value={(block.content.avatarUrl as string) || ''}
@@ -2054,10 +2059,9 @@ function LinkButtonEditor({ block, updateContent, updateStyle: _updateStyle }: {
                 className="w-10 h-10 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: detectedPlatform.color + '15' }}
               >
-                <detectedPlatform.icon 
-                  className="w-6 h-6" 
-                  style={{ color: detectedPlatform.color }}
-                />
+                <span style={{ color: detectedPlatform.color }}>
+                  <detectedPlatform.icon className="w-6 h-6" />
+                </span>
               </div>
               <div>
                 <div className="text-xs font-medium text-gray-500 dark:text-gray-400">Detected Platform</div>
@@ -2543,7 +2547,7 @@ function PaymentEditor({ block, updateContent, updateStyle, pageTheme }: {
   return (
     <>
       {/* Visual Style Selector */}
-      <Section title="Style" icon={Palette} defaultOpen={true}>
+      <Section title="Style" icon={Palette} defaultOpen={true} tooltip="Accept tips, sell products, or collect donations. Connect Stripe in Settings to process real payments.">
         <div className="grid grid-cols-2 gap-2">
           {[
             { value: 'classic', label: 'Classic', desc: 'Clean card layout', icon: LayoutGrid },
@@ -3462,7 +3466,7 @@ function FormEditor({ block, updateContent }: {
   return (
     <>
       {/* Content Section */}
-      <Section title="Content" icon={Type} defaultOpen={true}>
+      <Section title="Content" icon={Type} defaultOpen={true} tooltip="Collect visitor information with a customizable form. Submissions are sent to your email.">
         <TextField
           label="Form Title"
           value={(block.content.title as string) || ''}
@@ -3753,7 +3757,7 @@ function SocialEditor({ block, updateContent, updateStyle }: {
   return (
     <>
       {/* Social Links Section */}
-      <Section title="Social Links" icon={Share2} defaultOpen={true}>
+      <Section title="Social Links" icon={Share2} defaultOpen={true} tooltip="Add your social media profiles. Visitors can tap to follow you directly. Drag to reorder.">
         <div className="space-y-3">
           {links.map((link, index) => (
             <div
@@ -4480,7 +4484,7 @@ function GalleryEditor({ block, updateContent }: {
   
   return (
     <>
-      <Section title="Images" icon={ImageIcon} defaultOpen={true}>
+      <Section title="Images" icon={ImageIcon} defaultOpen={true} tooltip="Upload images or paste URLs. Drag to reorder. Choose a layout style below.">
         {/* Quick add multiple images */}
         <div className="mb-4">
           <label className="block text-xs font-medium text-muted-foreground mb-2">
@@ -5351,7 +5355,7 @@ function MapEditor({ block, updateContent }: {
   
   return (
     <>
-      <Section title="Style" icon={Palette} defaultOpen={true}>
+      <Section title="Style" icon={Palette} defaultOpen={true} tooltip="Embed a Google Maps location. Enter your address or paste coordinates below.">
         <div className="w-full flex flex-col gap-2">
           {[
             { value: 'classic', label: 'Classic', icon: MapPin, desc: 'Standard map embed' },
@@ -7841,6 +7845,14 @@ function RealEstateEditor({ block, updateContent, updateStyle: _updateStyle, pag
 }
 
 // Schedule Block Editor
+interface ScheduleServiceType {
+  id: string;
+  name: string;
+  duration: number;
+  price?: number;
+  icon?: string;
+}
+
 function ScheduleEditor({ block, updateContent }: { 
   block: Block; 
   updateContent: (key: string, value: unknown) => void;
@@ -7853,7 +7865,7 @@ function ScheduleEditor({ block, updateContent }: {
     { value: 'embedded', label: 'Embedded (Calendly)' },
   ];
 
-  const services = (block.content.services as ServiceType[]) || [];
+  const services = (block.content.services as ScheduleServiceType[]) || [];
 
   return (
     <>
@@ -8035,22 +8047,22 @@ function ScheduleEditor({ block, updateContent }: {
       <Section title="Form Fields" icon={FileText} defaultOpen={false}>
         <ToggleField
           label="Require Name"
-          value={(block.content.requireName as boolean) ?? true}
+          checked={(block.content.requireName as boolean) ?? true}
           onChange={(v) => updateContent('requireName', v)}
         />
         <ToggleField
           label="Require Email"
-          value={(block.content.requireEmail as boolean) ?? true}
+          checked={(block.content.requireEmail as boolean) ?? true}
           onChange={(v) => updateContent('requireEmail', v)}
         />
         <ToggleField
           label="Require Phone"
-          value={(block.content.requirePhone as boolean) ?? false}
+          checked={(block.content.requirePhone as boolean) ?? false}
           onChange={(v) => updateContent('requirePhone', v)}
         />
         <ToggleField
           label="Show Notes Field"
-          value={(block.content.showNotes as boolean) ?? true}
+          checked={(block.content.showNotes as boolean) ?? true}
           onChange={(v) => updateContent('showNotes', v)}
         />
       </Section>
@@ -8064,12 +8076,12 @@ function ScheduleEditor({ block, updateContent }: {
         />
         <ToggleField
           label="Send Email Confirmation"
-          value={(block.content.sendConfirmation as boolean) ?? true}
+          checked={(block.content.sendConfirmation as boolean) ?? true}
           onChange={(v) => updateContent('sendConfirmation', v)}
         />
         <ToggleField
           label="Add to Calendar"
-          value={(block.content.addToCalendar as boolean) ?? true}
+          checked={(block.content.addToCalendar as boolean) ?? true}
           onChange={(v) => updateContent('addToCalendar', v)}
         />
       </Section>

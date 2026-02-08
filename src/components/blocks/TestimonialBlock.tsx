@@ -133,9 +133,9 @@ export default function TestimonialBlock({ block, theme }: TestimonialBlockProps
           whileHover={{ scale: 1.05 }}
           className={`${sizeMap[size]} rounded-full overflow-hidden ring-2 shadow-lg`}
           style={{ 
-            ringColor: `${primaryColor}40`,
+            '--tw-ring-color': `${primaryColor}40`,
             boxShadow: `0 4px 15px ${primaryColor}20`
-          }}
+          } as React.CSSProperties}
         >
           <img
             src={item.avatar}

@@ -100,6 +100,7 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
   const [currentImageIndex, setCurrentImageIndex] = useState<Record<number, number>>({});
   const [likedProperties, setLikedProperties] = useState<Set<number>>(new Set());
   const [hoveredProperty, setHoveredProperty] = useState<number | null>(null);
+  const [_selectedProperty, setSelectedProperty] = useState<number | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0); // Moved to top level to follow React hooks rules
 
   // Configuration

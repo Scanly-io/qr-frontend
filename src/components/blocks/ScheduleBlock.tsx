@@ -91,7 +91,6 @@ function formatTime(time: string): string {
 }
 
 export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
-  console.log('ScheduleBlock rendering', { block, theme });
   
   // Payment context for pre-authorization
   const payment = usePayment();
@@ -128,14 +127,11 @@ export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
   
   // Auto-select first service if not in cards style
   useEffect(() => {
-    console.log('useEffect running', { selectedService, style, servicesLength: services.length });
-    // Only auto-select if we haven't selected anything yet and we have services
     if (selectedService === null && style !== 'cards' && services.length > 0) {
-      console.log('Auto-selecting first service:', services[0].id);
       setSelectedService(services[0].id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, []);
   
   // Available time slots (sample data)
   const availableSlots: TimeSlot[] = (content.timeSlots as TimeSlot[]) || [
@@ -292,19 +288,16 @@ export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
         });
         
         // Payment successful, proceed with booking
-        const response = await createAppointment(appointmentData);
-        console.log('Paid appointment created:', response);
+        await createAppointment(appointmentData);
       } else {
         // Free appointment, create directly
-        const response = await createAppointment(appointmentData);
-        console.log('Free appointment created:', response);
+        await createAppointment(appointmentData);
       }
       
       // Show success message and calendar export options
       setShowCalendarOptions(true);
       
     } catch (error) {
-      console.error('Error booking appointment:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to book appointment. Please try again.';
       alert(errorMessage);
     } finally {

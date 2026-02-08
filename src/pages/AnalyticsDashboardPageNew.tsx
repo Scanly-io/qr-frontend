@@ -3,14 +3,23 @@ import { useState, useEffect } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { analyticsApi } from '@/lib/api';
+import { analyticsApi, micrositeApi } from '@/lib/api';
 import {
-  TrendingUp, Users, MapPin, Smartphone, Clock, MousePointer, Globe, ExternalLink, Activity
+  TrendingUp, Users, MapPin, Smartphone, Clock, MousePointer, Globe, ExternalLink, Activity, ChevronDown
 } from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
+
+interface MicrositeOption {
+  id: string;
+  qrId: string;
+  title: string;
+}
 
 export default function AnalyticsDashboardPage() {
   const [loading, setLoading] = useState(true);
-  const [qrId] = useState('qr-d83ac423');
+  const [microsites, setMicrosites] = useState<MicrositeOption[]>([]);
+  const [selectedQrId, setSelectedQrId] = useState<string>('');
+  const [showDropdown, setShowDropdown] = useState(false);
   
   const [stats, setStats] = useState<any>(null);
   const [timeseries, setTimeseries] = useState<any>(null);
@@ -21,49 +30,74 @@ export default function AnalyticsDashboardPage() {
   const [referrers, setReferrers] = useState<any>(null);
   const [funnel, setFunnel] = useState<any>(null);
 
-  const loadAnalytics = async () => {
-    setLoading(true);
-    try {
-      const [summaryRes, timeseriesRes, geoRes, devicesRes, patternsRes, ctaRes, referrersRes, funnelRes] =
-        await Promise.all([
-          analyticsApi.getSummary(qrId),
-          analyticsApi.getTimeseries(qrId),
-          analyticsApi.getGeography(qrId),
-          analyticsApi.getDevices(qrId),
-          analyticsApi.getPatterns(qrId),
-          analyticsApi.getCTAButtons(qrId),
-          analyticsApi.getReferrers(qrId),
-          analyticsApi.getFunnel(qrId)
-        ]);
-
-      setStats(summaryRes);
-      setTimeseries(timeseriesRes);
-      setGeographic(geoRes);
-      setDevices(devicesRes);
-      setPatterns(patternsRes);
-      setCtaButtons(ctaRes);
-      setReferrers(referrersRes);
-      setFunnel(funnelRes);
-    } catch (error) {
-      console.error('Failed to load analytics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Load microsites on mount, then load analytics for the first one
   useEffect(() => {
-    loadAnalytics();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const init = async () => {
+      try {
+        const data = await micrositeApi.list();
+        const options = (data as MicrositeOption[]).map(m => ({
+          id: m.id,
+          qrId: m.qrId,
+          title: m.title,
+        }));
+        setMicrosites(options);
+        if (options.length > 0) {
+          setSelectedQrId(options[0].qrId);
+        } else {
+          setLoading(false);
+        }
+      } catch {
+        setLoading(false);
+      }
+    };
+    init();
   }, []);
+
+  // Load analytics whenever selectedQrId changes
+  useEffect(() => {
+    if (!selectedQrId) return;
+    const loadAnalytics = async () => {
+      setLoading(true);
+      try {
+        const [summaryRes, timeseriesRes, geoRes, devicesRes, patternsRes, ctaRes, referrersRes, funnelRes] =
+          await Promise.all([
+            analyticsApi.getSummary(selectedQrId),
+            analyticsApi.getTimeseries(selectedQrId),
+            analyticsApi.getGeography(selectedQrId),
+            analyticsApi.getDevices(selectedQrId),
+            analyticsApi.getPatterns(selectedQrId),
+            analyticsApi.getCTAButtons(selectedQrId),
+            analyticsApi.getReferrers(selectedQrId),
+            analyticsApi.getFunnel(selectedQrId)
+          ]);
+
+        setStats(summaryRes);
+        setTimeseries(timeseriesRes);
+        setGeographic(geoRes);
+        setDevices(devicesRes);
+        setPatterns(patternsRes);
+        setCtaButtons(ctaRes);
+        setReferrers(referrersRes);
+        setFunnel(funnelRes);
+      } catch (error) {
+        console.error('Failed to load analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAnalytics();
+  }, [selectedQrId]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading analytics...</p>
+      <AppLayout>
+        <div className="flex items-center justify-center h-full min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-14 h-14 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-slate-500 text-sm">Loading analytics...</p>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -72,30 +106,72 @@ export default function AnalyticsDashboardPage() {
     : '0';
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header with User Tracking Summary */}
+    <AppLayout>
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        {/* Header with Microsite Selector */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Analytics Dashboard</h1>
-          <div className="flex items-center gap-4 flex-wrap">
-            <p className="text-slate-600">Comprehensive tracking enabled:</p>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
-                <MousePointer className="w-3 h-3" />
-                <span>Button Clicks</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Analytics</h1>
+              <p className="text-sm text-slate-500 mt-1">Track performance and engagement</p>
+            </div>
+            
+            {/* Microsite Selector */}
+            {microsites.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-violet-300 transition-all shadow-sm text-sm font-medium text-slate-700 min-w-[200px]"
+                >
+                  <span className="truncate flex-1 text-left">
+                    {microsites.find(m => m.qrId === selectedQrId)?.title || 'Select microsite'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                {showDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+                    <div className="absolute right-0 mt-1 w-64 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 max-h-64 overflow-auto">
+                      {microsites.map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => {
+                            setSelectedQrId(m.qrId);
+                            setShowDropdown(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-violet-50 transition-colors ${
+                            m.qrId === selectedQrId ? 'bg-violet-50 text-violet-700 font-medium' : 'text-slate-700'
+                          }`}
+                        >
+                          <div className="truncate font-medium">{m.title}</div>
+                          <div className="text-xs text-slate-400 font-mono">/{m.qrId}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                <MapPin className="w-3 h-3" />
-                <span>Geo-Location</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
-                <Smartphone className="w-3 h-3" />
-                <span>Device Info</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                <Globe className="w-3 h-3" />
-                <span>Referrers</span>
-              </div>
+            )}
+          </div>
+
+          {/* Tracking badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-slate-400">Tracking:</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
+              <MousePointer className="w-3 h-3" />
+              <span>Clicks</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+              <MapPin className="w-3 h-3" />
+              <span>Geo</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+              <Smartphone className="w-3 h-3" />
+              <span>Devices</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+              <Globe className="w-3 h-3" />
+              <span>Referrers</span>
             </div>
           </div>
         </div>
@@ -749,6 +825,6 @@ export default function AnalyticsDashboardPage() {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }

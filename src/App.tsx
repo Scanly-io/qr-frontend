@@ -16,8 +16,10 @@ import StripeTestPage from '@/pages/StripeTestPage';
 import PaymentReturnPage from '@/pages/PaymentReturnPage';
 import StripeConnectPage from '@/pages/StripeConnectPage';
 import PaymentHistoryPage from '@/pages/PaymentHistoryPage';
+import PublicMicrositePage from '@/pages/PublicMicrositePage';
 import { PaymentProvider } from '@/contexts/PaymentContext';
 import { CartWidget } from '@/components/ui/CartWidget';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 function App() {
   return (
@@ -27,20 +29,27 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/templates" element={<TemplateGalleryPage />} />
-          <Route path="/analytics" element={<AnalyticsDashboardPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/agency" element={<AgencyManagementPage />} />
+          
+          {/* Public Microsite — React-rendered, no auth */}
+          <Route path="/public/:slug" element={<PublicMicrositePage />} />
+          
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/templates" element={<ProtectedRoute><TemplateGalleryPage /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute><AnalyticsDashboardPage /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          <Route path="/agency" element={<ProtectedRoute><AgencyManagementPage /></ProtectedRoute>} />
+          <Route path="/editor/:id" element={<ProtectedRoute><EditorPage /></ProtectedRoute>} />
+          <Route path="/payment/history" element={<ProtectedRoute><PaymentHistoryPage /></ProtectedRoute>} />
+          <Route path="/stripe/connect" element={<ProtectedRoute><StripeConnectPage /></ProtectedRoute>} />
+          
+          {/* Test/Dev Pages - Not protected for testing */}
           <Route path="/ml-test" element={<MLTestPage />} />
           <Route path="/accessibility" element={<AccessibilityScannerPage />} />
           <Route path="/utm-builder" element={<UTMBuilderPage />} />
           <Route path="/payment-test" element={<PaymentTestPage />} />
           <Route path="/stripe-test" element={<StripeTestPage />} />
           <Route path="/payment/return" element={<PaymentReturnPage />} />
-          <Route path="/payment/history" element={<PaymentHistoryPage />} />
-          <Route path="/stripe/connect" element={<StripeConnectPage />} />
-          <Route path="/editor/:id" element={<EditorPage />} />
           <Route path="/test-auth" element={<TestAuthPage />} />
         </Routes>
         <CartWidget />

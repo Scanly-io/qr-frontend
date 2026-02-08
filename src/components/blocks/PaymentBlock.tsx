@@ -10,7 +10,7 @@
  * - Webhook integration for order tracking
  */
 
-import { useState } from 'react';
+import { useState} from 'react';
 import { 
   CreditCard, 
   Heart, 
@@ -25,7 +25,7 @@ import {
   Plus,
   Minus,
   Trash2,
-  Package
+  Package,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Block } from '@/types';
@@ -34,6 +34,7 @@ import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import { integrationsApi } from '@/lib/api/integrations';
 import { spacing, animations, borders } from '@/utils/designSystem';
+
 
 interface PaymentBlockProps {
   block: Block;
