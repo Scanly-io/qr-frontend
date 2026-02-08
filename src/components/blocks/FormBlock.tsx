@@ -22,6 +22,7 @@ import {
 import { useState } from 'react';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { spacing, shadows, animations } from '@/utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface FormBlockProps {
   block: Block;
@@ -127,6 +128,7 @@ export default function FormBlock({ block, theme }: FormBlockProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    trackCTA(block.id, `${formType} form: ${title}`, '', 'form');
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);

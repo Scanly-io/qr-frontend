@@ -16,6 +16,7 @@ import {
 } from '../../utils/designSystem';
 import { usePayment } from '@/contexts/PaymentContext';
 import { useAuthStore } from '@/store/authStore';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface ArtistBlockProps {
   block: Block;
@@ -776,7 +777,7 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
                   rel="noopener noreferrer"
                   className="p-1"
                   whileHover={{ scale: 1.1 }}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); trackCTA(block.id, track.title || 'Listen', track.spotifyUrl!, 'artist'); }}
                 >
                   <ExternalLink className="w-4 h-4" style={{ color: bodyColor }} />
                 </motion.a>

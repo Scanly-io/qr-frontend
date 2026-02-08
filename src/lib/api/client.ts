@@ -98,9 +98,14 @@ export async function apiCall<T = unknown>(
         // Retry the original request with new token
         return await apiCall<T>(endpoint, options, true);
       } catch {
-        // Clear auth and redirect to login
+        // Refresh failed - clear ALL auth state and redirect
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('auth-storage');
+        isRefreshing = false;
+        refreshPromise = null;
+        
+        // Redirect to login
         window.location.href = '/login';
         throw new Error('Session expired. Please login again.');
       }

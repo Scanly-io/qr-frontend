@@ -73,6 +73,7 @@ const statusConfig = {
     color: 'text-green-600',
     bg: 'bg-green-50',
     text: 'text-green-700',
+    spin: false,
   },
   saving: {
     icon: Loader2,
@@ -86,12 +87,14 @@ const statusConfig = {
     color: 'text-orange-600',
     bg: 'bg-orange-50',
     text: 'text-orange-700',
+    spin: false,
   },
   published: {
     icon: Check,
     color: 'text-violet-600',
     bg: 'bg-violet-50',
     text: 'text-violet-700',
+    spin: false,
   },
 } as const;
 

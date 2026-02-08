@@ -18,6 +18,7 @@ import {
 } from '../../utils/designSystem';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { usePayment } from '@/contexts/PaymentContext';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface MenuBlockProps {
   block: Block;
@@ -185,6 +186,7 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
 
   // Cart functions using PaymentContext
   const handleAddToCart = (item: MenuItem, categoryIndex: number, itemIndex: number) => {
+    trackCTA(block.id, item.name, `menu-item-${categoryIndex}-${itemIndex}`, 'menu');
     addToPaymentCart({
       id: `menu-${block.id}-${categoryIndex}-${itemIndex}`,
       type: 'product',

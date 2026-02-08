@@ -5,6 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import Canvas from '@/components/editor/Canvas';
 import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
+import { setTrackingSlug } from '@/utils/trackCTA';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost';
 
@@ -49,10 +50,19 @@ export default function PublicMicrositePage() {
         const json: MicrositePublicData = await response.json();
         setData(json);
 
+        // Set the QR slug for CTA tracking so events use the
+        // canonical qrId (e.g. "qr-a6ec9ceb") instead of the UUID path
+        if (json.qrId) {
+          setTrackingSlug(json.qrId);
+        }
+
         // Set page title
         if (json.title) {
           document.title = json.title;
         }
+
+        // Analytics are tracked automatically by the backend when
+        // /public/:slug/data is called - no need for manual tracking
       } catch (err) {
         console.error('Failed to load microsite:', err);
         setError('network-error');

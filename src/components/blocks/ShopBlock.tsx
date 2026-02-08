@@ -36,6 +36,7 @@ import {
   getCardStyles,
   getPrimaryShadow
 } from '../../utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface ShopBlockProps {
   block: Block;
@@ -149,6 +150,7 @@ export default function ShopBlock({
   const addToCart = (product: Product) => {
     if (isEditing) return;
     if (product.inStock === false) return;
+    trackCTA(block.id, product.name, `shop-item-${product.id}`, 'shop');
     
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -193,6 +195,7 @@ export default function ShopBlock({
   const handleCheckout = async () => {
     if (isEditing || cart.length === 0) return;
     
+    trackCTA(block.id, `Checkout ($${cartTotal.toFixed(2)}, ${cart.length} items)`, '', 'shop-checkout');
     setIsProcessing(true);
     
     try {

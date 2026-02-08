@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Plus, QrCode, Eye, Edit, Trash2, Sparkles, TrendingUp, Copy, ExternalLink, BarChart3 } from 'lucide-react';
+import { Plus, QrCode, Eye, Edit, Trash2, TrendingUp, Copy, ExternalLink, BarChart3 } from 'lucide-react';
 import { micrositeApi, analyticsApi } from '../lib/api';
 import { TemplateSelectionDialog } from '../components/editor/TemplateSelectionDialog';
 import { AppLayout } from '../components/layout/AppLayout';
@@ -27,7 +27,6 @@ export default function DashboardPage() {
   const [microsites, setMicrosites] = useState<Microsite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [stats, setStats] = useState<OverviewStats>({ totalScans: 0, totalScansToday: 0, totalScansLast7Days: 0 });
 
   useEffect(() => {
@@ -121,13 +120,6 @@ export default function DashboardPage() {
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setShowTemplateDialog(true)}
-                  className="inline-flex items-center justify-center gap-2 bg-white text-violet-600 px-5 py-2.5 rounded-xl font-semibold hover:bg-violet-50 transition-all shadow-sm hover:shadow-md border border-violet-200"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span className="hidden sm:inline">Use Template</span>
-                </button>
-                <button
                   onClick={handleCreateMicrosite}
                   disabled={isCreating}
                   className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:from-violet-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
@@ -214,14 +206,7 @@ export default function DashboardPage() {
               <p className="text-slate-500 mb-6 max-w-sm mx-auto text-sm">
                 Create your first QR microsite — it only takes a few seconds!
               </p>
-              <div className="flex justify-center gap-3">
-                <button
-                  onClick={() => setShowTemplateDialog(true)}
-                  className="inline-flex items-center gap-2 bg-white text-violet-600 px-6 py-3 rounded-xl font-semibold border border-violet-200 hover:bg-violet-50 transition-all"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Start from Template
-                </button>
+              <div className="flex justify-center">
                 <button
                   onClick={handleCreateMicrosite}
                   disabled={isCreating}
@@ -304,28 +289,6 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-
-        {/* Template Selection Dialog */}
-        <TemplateSelectionDialog
-          open={showTemplateDialog}
-          onClose={() => setShowTemplateDialog(false)}
-          onSelect={async () => {
-            setIsCreating(true);
-            setShowTemplateDialog(false);
-            try {
-              const newMicrosite = await micrositeApi.create({
-                title: `New Microsite from Template`,
-                description: '',
-                layout: [],
-              });
-              navigate(`/editor/${newMicrosite.id}`);
-            } catch (error) {
-              console.error('Failed to create microsite from template:', error);
-              alert('Failed to create microsite: ' + (error instanceof Error ? error.message : 'Unknown error'));
-              setIsCreating(false);
-            }
-          }}
-        />
     </AppLayout>
   );
 }

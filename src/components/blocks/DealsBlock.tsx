@@ -8,6 +8,7 @@ import {
 import { useState, useEffect, memo } from 'react';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { usePayment } from '@/contexts/PaymentContext';
+import { trackCTA } from '@/utils/trackCTA';
 import { 
   spacing, 
   typography, 
@@ -182,6 +183,7 @@ export default function DealsBlock({ block, theme }: DealsBlockProps) {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
       setTimeout(() => setCopiedCode(null), 2000);
+      trackCTA(block.id, `Copy Code: ${code}`, '', 'deals');
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -195,6 +197,7 @@ export default function DealsBlock({ block, theme }: DealsBlockProps) {
       ? deal.originalPrice - deal.discountedPrice 
       : 0;
     
+    trackCTA(block.id, deal.title, `deal-${block.id}-${index}`, 'deals');
     addToCart({
       id: `deal-${block.id}-${index}`,
       type: 'product',

@@ -11,6 +11,7 @@ import {
   getPrimaryShadow 
 } from '@/utils/designSystem';
 import { getTitleFont, getBodyFont } from '@/lib/themeHelpers';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface HeroBlockProps {
   block: Block;
@@ -526,7 +527,7 @@ export default function HeroBlock({ block, theme, colorPalette }: HeroBlockProps
                     boxShadow: getPrimaryShadow(buttonColor, 'normal'),
                   }}
                 >
-                  <a href={buttonUrl} className="inline-flex items-center gap-2">
+                  <a href={buttonUrl} className="inline-flex items-center gap-2" onClick={() => trackCTA(block.id, buttonText, buttonUrl, 'hero')}>
                     <span className="relative z-10 drop-shadow-sm">{buttonText}</span>
                     <motion.span
                       className="relative z-10"
@@ -565,7 +566,7 @@ export default function HeroBlock({ block, theme, colorPalette }: HeroBlockProps
                     boxShadow: 'rgba(255,255,255,0.1) 0px 8px 24px',
                   }}
                 >
-                  <a href={secondaryButtonUrl} className="inline-flex items-center gap-2">
+                  <a href={secondaryButtonUrl} className="inline-flex items-center gap-2" onClick={() => trackCTA(block.id, secondaryButtonText, secondaryButtonUrl, 'hero-secondary')}>
                     <motion.div
                       animate={{ scale: [1, 1.15, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}

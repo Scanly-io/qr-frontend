@@ -19,6 +19,7 @@ import {
   TeamsIcon,
   BrandColors 
 } from '@/components/icons/BrandIcons';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface ScheduleBlockProps {
   block: Block;
@@ -359,6 +360,7 @@ END:VCALENDAR`;
     }
     
     if (calendarUrl) {
+      trackCTA(block.id, 'Add to Calendar', calendarUrl, 'schedule');
       window.open(calendarUrl, '_blank');
     }
   };
@@ -415,6 +417,7 @@ END:VCALENDAR`;
           style={{ backgroundColor: primaryColor }}
           whileHover={{ scale: 1.02, boxShadow: `0 10px 30px ${primaryColor}40` }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => trackCTA(block.id, 'Schedule with Calendly', calendlyUrl!, 'schedule')}
         >
           <CalendarCheck className="w-5 h-5" />
           <span>Schedule with Calendly</span>
@@ -686,19 +689,163 @@ END:VCALENDAR`;
           </motion.div>
         )}
         
-        {/* Confirm button */}
+        {/* Customer Info + Confirm */}
         {selectedDate && selectedTime && (
-          <motion.button
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full mt-6 py-4 rounded-xl font-semibold text-white"
-            style={{ backgroundColor: primaryColor }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="mt-6 space-y-4"
           >
-            Confirm Booking
-          </motion.button>
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: titleColor }}>
+                Full Name <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Enter your full name"
+                required
+                className="w-full px-4 py-3 rounded-xl text-sm transition-all focus:outline-none"
+                style={{
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                  border: `2px solid ${cardBorder}`,
+                  color: titleColor,
+                }}
+                onFocus={(e) => { e.target.style.borderColor = primaryColor; }}
+                onBlur={(e) => { e.target.style.borderColor = cardBorder; }}
+              />
+            </div>
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: titleColor }}>
+                Email Address <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input
+                type="email"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                placeholder="your.email@example.com"
+                required
+                className="w-full px-4 py-3 rounded-xl text-sm transition-all focus:outline-none"
+                style={{
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                  border: `2px solid ${cardBorder}`,
+                  color: titleColor,
+                }}
+                onFocus={(e) => { e.target.style.borderColor = primaryColor; }}
+                onBlur={(e) => { e.target.style.borderColor = cardBorder; }}
+              />
+            </div>
+            {/* Submit */}
+            <motion.button
+              onClick={handleSubmit}
+              disabled={isSubmitting || isCheckoutLoading || !customerName.trim() || !customerEmail.trim()}
+              className="w-full py-4 rounded-xl font-semibold text-white disabled:opacity-50"
+              style={{ backgroundColor: primaryColor }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isSubmitting || isCheckoutLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processing...
+                </span>
+              ) : (
+                'Confirm Booking'
+              )}
+            </motion.button>
+          </motion.div>
         )}
+
+        {/* Calendar export modal (shown after successful booking) */}
+        <AnimatePresence>
+          {showCalendarOptions && selectedDate && selectedTime && selectedService && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowCalendarOptions(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="max-w-md w-full rounded-2xl p-6"
+                style={{ backgroundColor: isDark ? '#18181b' : '#ffffff' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="text-center mb-6">
+                  <div 
+                    className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+                    style={{ backgroundColor: `${BrandColors.googleCalendar}15` }}
+                  >
+                    <Check className="w-8 h-8" style={{ color: BrandColors.googleCalendar }} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2" style={{ color: titleColor }}>
+                    Booking Confirmed!
+                  </h3>
+                  <p className="text-sm" style={{ color: bodyColor }}>
+                    Add this appointment to your calendar
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <motion.button
+                    onClick={() => addToCalendar('google')}
+                    className="w-full flex items-center gap-3 p-4 rounded-xl transition-all"
+                    style={{ backgroundColor: cardBg, border: `1px solid ${cardBorder}` }}
+                    whileHover={{ borderColor: BrandColors.googleCalendar, backgroundColor: `${BrandColors.googleCalendar}08` }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <GoogleCalendarIcon className="w-6 h-6" style={{ color: BrandColors.googleCalendar }} />
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold text-sm" style={{ color: titleColor }}>Google Calendar</div>
+                      <div className="text-xs" style={{ color: bodyColor }}>Add to Google Calendar</div>
+                    </div>
+                    <ChevronRight className="w-5 h-5" style={{ color: bodyColor }} />
+                  </motion.button>
+                  <motion.button
+                    onClick={() => addToCalendar('outlook')}
+                    className="w-full flex items-center gap-3 p-4 rounded-xl transition-all"
+                    style={{ backgroundColor: cardBg, border: `1px solid ${cardBorder}` }}
+                    whileHover={{ borderColor: BrandColors.outlook, backgroundColor: `${BrandColors.outlook}08` }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <OutlookIcon className="w-6 h-6" style={{ color: BrandColors.outlook }} />
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold text-sm" style={{ color: titleColor }}>Outlook</div>
+                      <div className="text-xs" style={{ color: bodyColor }}>Add to Outlook Calendar</div>
+                    </div>
+                    <ChevronRight className="w-5 h-5" style={{ color: bodyColor }} />
+                  </motion.button>
+                  <motion.button
+                    onClick={() => addToCalendar('apple')}
+                    className="w-full flex items-center gap-3 p-4 rounded-xl transition-all"
+                    style={{ backgroundColor: cardBg, border: `1px solid ${cardBorder}` }}
+                    whileHover={{ borderColor: BrandColors.appleCalendar, backgroundColor: `${BrandColors.appleCalendar}08` }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <AppleCalendarIcon className="w-6 h-6" style={{ color: BrandColors.appleCalendar }} />
+                    <div className="flex-1 text-left">
+                      <div className="font-semibold text-sm" style={{ color: titleColor }}>Apple Calendar</div>
+                      <div className="text-xs" style={{ color: bodyColor }}>Download .ics file</div>
+                    </div>
+                    <ChevronRight className="w-5 h-5" style={{ color: bodyColor }} />
+                  </motion.button>
+                </div>
+                <button
+                  onClick={() => setShowCalendarOptions(false)}
+                  className="w-full mt-4 py-3 text-sm font-medium rounded-xl transition-colors"
+                  style={{ color: bodyColor, backgroundColor: `${bodyColor}10` }}
+                >
+                  Done
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }

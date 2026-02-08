@@ -1,11 +1,11 @@
 import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, MapPin, Bed, Bath, Square, Car, Heart, Share2, 
   Phone, Mail, ChevronLeft, ChevronRight, 
   Building2, Trees, Landmark, Store, CheckCircle2, Clock, 
-  XCircle, Star, Maximize2, ExternalLink
+  XCircle, Star, Maximize2, ExternalLink, X, Calendar
 } from 'lucide-react';
 import { useState } from 'react';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
@@ -14,6 +14,7 @@ import {
   animations, 
   getCardStyles
 } from '../../utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface RealEstateBlockProps {
   block: Block;
@@ -100,7 +101,7 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
   const [currentImageIndex, setCurrentImageIndex] = useState<Record<number, number>>({});
   const [likedProperties, setLikedProperties] = useState<Set<number>>(new Set());
   const [hoveredProperty, setHoveredProperty] = useState<number | null>(null);
-  const [_selectedProperty, setSelectedProperty] = useState<number | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0); // Moved to top level to follow React hooks rules
 
   // Configuration
@@ -449,7 +450,7 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
                     {property.agent.phone && (
                       <motion.a
                         href={`tel:${property.agent.phone}`}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); trackCTA(block.id, 'Call Agent', `tel:${property.agent?.phone}`, 'real-estate'); }}
                         className="w-11 h-11 rounded-full flex items-center justify-center shadow-md"
                         style={{ backgroundColor: `${primaryColor}20` }}
                         whileHover={{ scale: 1.1 }}
@@ -461,7 +462,7 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
                     {property.agent.email && (
                       <motion.a
                         href={`mailto:${property.agent.email}`}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); trackCTA(block.id, 'Email Agent', `mailto:${property.agent?.email}`, 'real-estate'); }}
                         className="w-11 h-11 rounded-full flex items-center justify-center shadow-md"
                         style={{ backgroundColor: `${primaryColor}20` }}
                         whileHover={{ scale: 1.1 }}
@@ -849,6 +850,279 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
     );
   };
 
+  // ===== PROPERTY DETAIL OVERLAY =====
+  const selectedProp = selectedProperty !== null ? properties[selectedProperty] : null;
+
+  const renderDetailOverlay = () => (
+    <AnimatePresence>
+      {selectedProp && selectedProperty !== null && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {/* Backdrop */}
+          <motion.div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedProperty(null)}
+          />
+
+          {/* Detail Card */}
+          <motion.div
+            className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-3xl shadow-2xl"
+            style={{
+              backgroundColor: isDark ? '#1f1f23' : '#ffffff',
+              border: `2px solid ${cardBorder}`,
+            }}
+            initial={{ opacity: 0, scale: 0.9, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 40 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <motion.button
+              onClick={() => setSelectedProperty(null)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full backdrop-blur-xl shadow-lg flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <X className="w-5 h-5 text-white" />
+            </motion.button>
+
+            {/* Hero Image */}
+            <div className="relative aspect-[16/10] overflow-hidden rounded-t-3xl">
+              <img
+                src={selectedProp.images[0]}
+                alt={selectedProp.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+
+              {/* Price on image */}
+              <div className="absolute bottom-4 left-5">
+                <span
+                  className="text-3xl font-black text-white"
+                  style={{ fontFamily: titleFontFamily }}
+                >
+                  {formatPrice(selectedProp.price)}
+                </span>
+                {selectedProp.priceLabel && (
+                  <span className="text-white/80 text-base font-semibold ml-2">
+                    {selectedProp.priceLabel}
+                  </span>
+                )}
+              </div>
+
+              {/* Status badge */}
+              {selectedProp.status && (() => {
+                const sc = getStatusConfig(selectedProp.status);
+                const SIcon = sc.icon;
+                return (
+                  <span
+                    className="absolute top-4 left-5 px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5 backdrop-blur-xl shadow-lg"
+                    style={{ backgroundColor: sc.bg, color: sc.text }}
+                  >
+                    <SIcon className="w-4 h-4" /> {sc.label}
+                  </span>
+                );
+              })()}
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-5">
+              {/* Title & Address */}
+              <div>
+                <h2
+                  className="text-2xl font-bold mb-1"
+                  style={{ fontFamily: titleFontFamily, color: titleColor }}
+                >
+                  {selectedProp.title}
+                </h2>
+                {selectedProp.address && (
+                  <div className="flex items-center gap-2" style={{ color: bodyColor }}>
+                    <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+                    <span className="text-sm font-medium">{selectedProp.address}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Specs Grid */}
+              <div
+                className="grid grid-cols-2 gap-4 py-4 border-t border-b"
+                style={{ borderColor: cardBorder }}
+              >
+                {selectedProp.bedrooms !== undefined && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${primaryColor}15` }}>
+                      <Bed className="w-5 h-5" style={{ color: primaryColor }} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold" style={{ color: titleColor }}>{selectedProp.bedrooms}</p>
+                      <p className="text-xs" style={{ color: bodyColor }}>Bedrooms</p>
+                    </div>
+                  </div>
+                )}
+                {selectedProp.bathrooms !== undefined && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${primaryColor}15` }}>
+                      <Bath className="w-5 h-5" style={{ color: primaryColor }} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold" style={{ color: titleColor }}>{selectedProp.bathrooms}</p>
+                      <p className="text-xs" style={{ color: bodyColor }}>Bathrooms</p>
+                    </div>
+                  </div>
+                )}
+                {selectedProp.sqft !== undefined && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${primaryColor}15` }}>
+                      <Square className="w-5 h-5" style={{ color: primaryColor }} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold" style={{ color: titleColor }}>{selectedProp.sqft.toLocaleString()}</p>
+                      <p className="text-xs" style={{ color: bodyColor }}>Sq Ft</p>
+                    </div>
+                  </div>
+                )}
+                {selectedProp.parking !== undefined && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${primaryColor}15` }}>
+                      <Car className="w-5 h-5" style={{ color: primaryColor }} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold" style={{ color: titleColor }}>{selectedProp.parking}</p>
+                      <p className="text-xs" style={{ color: bodyColor }}>Parking</p>
+                    </div>
+                  </div>
+                )}
+                {selectedProp.yearBuilt && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${primaryColor}15` }}>
+                      <Calendar className="w-5 h-5" style={{ color: primaryColor }} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold" style={{ color: titleColor }}>{selectedProp.yearBuilt}</p>
+                      <p className="text-xs" style={{ color: bodyColor }}>Year Built</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              {selectedProp.description && (
+                <div>
+                  <h4 className="text-sm font-bold mb-2" style={{ color: titleColor }}>About</h4>
+                  <p className="text-sm leading-relaxed" style={{ color: bodyColor }}>
+                    {selectedProp.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Features */}
+              {selectedProp.features && selectedProp.features.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-bold mb-2" style={{ color: titleColor }}>Features</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProp.features.map((feature, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1.5 rounded-full text-sm font-medium"
+                        style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Agent */}
+              {selectedProp.agent && (
+                <div
+                  className="flex items-center justify-between pt-4"
+                  style={{ borderTop: `2px solid ${cardBorder}` }}
+                >
+                  <div className="flex items-center gap-3">
+                    {selectedProp.agent.photo ? (
+                      <img
+                        src={selectedProp.agent.photo}
+                        alt={selectedProp.agent.name}
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-offset-2"
+                        style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
+                      />
+                    ) : (
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        {selectedProp.agent.name.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-base font-bold" style={{ color: titleColor }}>
+                        {selectedProp.agent.name}
+                      </p>
+                      <p className="text-sm" style={{ color: bodyColor }}>Listing Agent</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {selectedProp.agent.phone && (
+                      <motion.a
+                        href={`tel:${selectedProp.agent.phone}`}
+                        className="w-11 h-11 rounded-full flex items-center justify-center shadow-md"
+                        style={{ backgroundColor: primaryColor, color: '#fff' }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => trackCTA(block.id, 'Call Agent', `tel:${selectedProp.agent?.phone}`, 'real-estate')}
+                      >
+                        <Phone className="w-5 h-5" />
+                      </motion.a>
+                    )}
+                    {selectedProp.agent.email && (
+                      <motion.a
+                        href={`mailto:${selectedProp.agent.email}`}
+                        className="w-11 h-11 rounded-full flex items-center justify-center shadow-md"
+                        style={{ backgroundColor: `${primaryColor}20` }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => trackCTA(block.id, 'Email Agent', `mailto:${selectedProp.agent?.email}`, 'real-estate')}
+                      >
+                        <Mail className="w-5 h-5" style={{ color: primaryColor }} />
+                      </motion.a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Virtual Tour CTA */}
+              {selectedProp.virtualTourUrl && (
+                <motion.a
+                  href={selectedProp.virtualTourUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-white"
+                  style={{ backgroundColor: primaryColor }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => trackCTA(block.id, 'Virtual Tour', selectedProp.virtualTourUrl!, 'real-estate')}
+                >
+                  <Maximize2 className="w-5 h-5" />
+                  Virtual Tour
+                </motion.a>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   // ===== GRID LAYOUT =====
   if (layout === 'grid') {
     return (
@@ -856,6 +1130,7 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
         <div className={`grid ${gridColsMap[columns]} gap-6`}>
           {properties.map((property, index) => renderPropertyCard(property, index))}
         </div>
+        {renderDetailOverlay()}
       </div>
     );
   }
@@ -867,6 +1142,7 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
         <div className="space-y-4">
           {properties.map((property, index) => renderPropertyCard(property, index))}
         </div>
+        {renderDetailOverlay()}
       </div>
     );
   }

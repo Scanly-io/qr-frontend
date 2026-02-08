@@ -1,13 +1,103 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { analyticsApi, micrositeApi } from '@/lib/api';
 import {
-  TrendingUp, Users, MapPin, Smartphone, Clock, MousePointer, Globe, ExternalLink, Activity, ChevronDown
+  TrendingUp, Users, MapPin, Smartphone, Clock, MousePointer, Globe, ExternalLink, Activity, ChevronDown,
+  ArrowUpRight, ArrowDownRight, Calendar, Download, ChevronRight, BarChart3, Monitor, Tablet
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ComingSoonTooltip } from '@/components/ui/ComingSoonBadge';
+
+// Country name → flag emoji helper
+const countryToFlag = (country: string): string => {
+  const map: Record<string, string> = {
+    'United States': '🇺🇸', 'US': '🇺🇸', 'USA': '🇺🇸',
+    'United Kingdom': '🇬🇧', 'UK': '🇬🇧', 'GB': '🇬🇧',
+    'Canada': '🇨🇦', 'CA': '🇨🇦',
+    'Australia': '🇦🇺', 'AU': '🇦🇺',
+    'Germany': '🇩🇪', 'DE': '🇩🇪',
+    'France': '🇫🇷', 'FR': '🇫🇷',
+    'India': '🇮🇳', 'IN': '🇮🇳',
+    'Japan': '🇯🇵', 'JP': '🇯🇵',
+    'China': '🇨🇳', 'CN': '🇨🇳',
+    'Brazil': '🇧🇷', 'BR': '🇧🇷',
+    'Mexico': '🇲🇽', 'MX': '🇲🇽',
+    'Spain': '🇪🇸', 'ES': '🇪🇸',
+    'Italy': '🇮🇹', 'IT': '🇮🇹',
+    'Netherlands': '🇳🇱', 'NL': '🇳🇱',
+    'South Korea': '🇰🇷', 'KR': '🇰🇷',
+    'Singapore': '🇸🇬', 'SG': '🇸🇬',
+    'Sweden': '🇸🇪', 'SE': '🇸🇪',
+    'Norway': '🇳🇴', 'NO': '🇳🇴',
+    'Denmark': '🇩🇰', 'DK': '🇩🇰',
+    'Finland': '🇫🇮', 'FI': '🇫🇮',
+    'Switzerland': '🇨🇭', 'CH': '🇨🇭',
+    'Austria': '🇦🇹', 'AT': '🇦🇹',
+    'Belgium': '🇧🇪', 'BE': '🇧🇪',
+    'Portugal': '🇵🇹', 'PT': '🇵🇹',
+    'Ireland': '🇮🇪', 'IE': '🇮🇪',
+    'New Zealand': '🇳🇿', 'NZ': '🇳🇿',
+    'Argentina': '🇦🇷', 'AR': '🇦🇷',
+    'Colombia': '🇨🇴', 'CO': '🇨🇴',
+    'Chile': '🇨🇱', 'CL': '🇨🇱',
+    'Poland': '🇵🇱', 'PL': '🇵🇱',
+    'Turkey': '🇹🇷', 'TR': '🇹🇷',
+    'Russia': '🇷🇺', 'RU': '🇷🇺',
+    'South Africa': '🇿🇦', 'ZA': '🇿🇦',
+    'Israel': '🇮🇱', 'IL': '🇮🇱',
+    'UAE': '🇦🇪', 'United Arab Emirates': '🇦🇪', 'AE': '🇦🇪',
+    'Saudi Arabia': '🇸🇦', 'SA': '🇸🇦',
+    'Thailand': '🇹🇭', 'TH': '🇹🇭',
+    'Indonesia': '🇮🇩', 'ID': '🇮🇩',
+    'Philippines': '🇵🇭', 'PH': '🇵🇭',
+    'Vietnam': '🇻🇳', 'VN': '🇻🇳',
+    'Malaysia': '🇲🇾', 'MY': '🇲🇾',
+    'Taiwan': '🇹🇼', 'TW': '🇹🇼',
+    'Hong Kong': '🇭🇰', 'HK': '🇭🇰',
+    'Nigeria': '🇳🇬', 'NG': '🇳🇬',
+    'Egypt': '🇪🇬', 'EG': '🇪🇬',
+    'Kenya': '🇰🇪', 'KE': '🇰🇪',
+    'Pakistan': '🇵🇰', 'PK': '🇵🇰',
+    'Bangladesh': '🇧🇩', 'BD': '🇧🇩',
+    'Unknown': '🌍',
+  };
+  return map[country] || '🌐';
+};
+
+// Custom dark tooltip component for all charts
+const DarkTooltip = ({ active, payload, label, formatter }: any) => {
+  if (!active || !payload?.length) return null;
+  const displayLabel = formatter?.label ? formatter.label(label) : label;
+  return (
+    <div className="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700">
+      <p className="text-xs text-slate-400 mb-1.5">{displayLabel}</p>
+      {payload.map((entry: any, i: number) => (
+        <div key={i} className="flex items-center gap-2">
+          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color || '#8b5cf6' }} />
+          <span className="text-sm font-medium">{Number(entry.value).toLocaleString()} {entry.name || 'scans'}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Empty state component
+const EmptyState = ({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle: string }) => (
+  <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+      <Icon className="w-8 h-8 text-slate-300" />
+    </div>
+    <p className="text-slate-500 text-sm font-medium">{title}</p>
+    <p className="text-slate-400 text-xs mt-1 max-w-[240px]">{subtitle}</p>
+  </div>
+);
+
+// Date range options
+type DateRange = '7d' | '30d' | '90d' | 'all';
 
 interface MicrositeOption {
   id: string;
@@ -20,6 +110,7 @@ export default function AnalyticsDashboardPage() {
   const [microsites, setMicrosites] = useState<MicrositeOption[]>([]);
   const [selectedQrId, setSelectedQrId] = useState<string>('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange>('30d');
   
   const [stats, setStats] = useState<any>(null);
   const [timeseries, setTimeseries] = useState<any>(null);
@@ -88,6 +179,24 @@ export default function AnalyticsDashboardPage() {
     loadAnalytics();
   }, [selectedQrId]);
 
+  // Filter timeseries data based on selected date range (must be before early return)
+  const filteredTimeseries = useMemo(() => {
+    const series = timeseries?.timeSeries || [];
+    if (dateRange === 'all' || series.length === 0) return series;
+    const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : 90;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    return series.filter((d: any) => new Date(d.date) >= cutoff);
+  }, [timeseries, dateRange]);
+
+  // Device type colors and icons for donut chart
+  const DEVICE_COLORS = ['#8b5cf6', '#3b82f6', '#f59e0b', '#10b981'];
+  const deviceIcon = (type: string) => {
+    if (type === 'mobile') return <Smartphone className="w-4 h-4" />;
+    if (type === 'tablet') return <Tablet className="w-4 h-4" />;
+    return <Monitor className="w-4 h-4" />;
+  };
+
   if (loading) {
     return (
       <AppLayout>
@@ -116,62 +225,76 @@ export default function AnalyticsDashboardPage() {
               <p className="text-sm text-slate-500 mt-1">Track performance and engagement</p>
             </div>
             
-            {/* Microsite Selector */}
-            {microsites.length > 0 && (
-              <div className="relative">
-                <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-violet-300 transition-all shadow-sm text-sm font-medium text-slate-700 min-w-[200px]"
-                >
-                  <span className="truncate flex-1 text-left">
-                    {microsites.find(m => m.qrId === selectedQrId)?.title || 'Select microsite'}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
-                </button>
-                {showDropdown && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-                    <div className="absolute right-0 mt-1 w-64 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 max-h-64 overflow-auto">
-                      {microsites.map((m) => (
-                        <button
-                          key={m.id}
-                          onClick={() => {
-                            setSelectedQrId(m.qrId);
-                            setShowDropdown(false);
-                          }}
-                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-violet-50 transition-colors ${
-                            m.qrId === selectedQrId ? 'bg-violet-50 text-violet-700 font-medium' : 'text-slate-700'
-                          }`}
-                        >
-                          <div className="truncate font-medium">{m.title}</div>
-                          <div className="text-xs text-slate-400 font-mono">/{m.qrId}</div>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+            <div className="flex items-center gap-3">
+              {/* Date Range Picker */}
+              <div className="flex items-center bg-slate-100 rounded-lg p-1">
+                {([
+                  { key: '7d' as DateRange, label: '7 days' },
+                  { key: '30d' as DateRange, label: '30 days' },
+                  { key: '90d' as DateRange, label: '90 days' },
+                  { key: 'all' as DateRange, label: 'All time' },
+                ]).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => setDateRange(key)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                      dateRange === key 
+                        ? 'bg-white text-slate-900 shadow-sm' 
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
 
-          {/* Tracking badges */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-slate-400">Tracking:</span>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
-              <MousePointer className="w-3 h-3" />
-              <span>Clicks</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-              <MapPin className="w-3 h-3" />
-              <span>Geo</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
-              <Smartphone className="w-3 h-3" />
-              <span>Devices</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-              <Globe className="w-3 h-3" />
-              <span>Referrers</span>
+              {/* Export CSV */}
+              <ComingSoonTooltip feature="CSV Export">
+                <button
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:border-slate-300 hover:text-slate-800 transition-all shadow-sm"
+                  title="Export as CSV"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Export</span>
+                </button>
+              </ComingSoonTooltip>
+
+              {/* Microsite Selector */}
+              {microsites.length > 0 && (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-violet-300 transition-all shadow-sm text-sm font-medium text-slate-700 min-w-[200px]"
+                  >
+                    <span className="truncate flex-1 text-left">
+                      {microsites.find(m => m.qrId === selectedQrId)?.title || 'Select microsite'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  {showDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+                      <div className="absolute right-0 mt-1 w-64 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1 max-h-64 overflow-auto">
+                        {microsites.map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => {
+                              setSelectedQrId(m.qrId);
+                              setShowDropdown(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-violet-50 transition-colors ${
+                              m.qrId === selectedQrId ? 'bg-violet-50 text-violet-700 font-medium' : 'text-slate-700'
+                            }`}
+                          >
+                            <div className="truncate font-medium">{m.title}</div>
+                            <div className="text-xs text-slate-400 font-mono">/{m.qrId}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -236,60 +359,250 @@ export default function AnalyticsDashboardPage() {
           </div>
         </div>
 
-        {/* Scan Trends Chart */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-8">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-slate-900">Scan Trends</h2>
-            <p className="text-sm text-slate-500 mt-1">Daily scan activity over time</p>
+        {/* Scan Trends Chart - Enhanced */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+          {/* Chart Header */}
+          <div className="px-8 pt-8 pb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">Scan Trends</h2>
+                  <p className="text-sm text-slate-500">Daily scan activity over time</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                {/* Summary stats */}
+                {(() => {
+                  const series = filteredTimeseries;
+                  const totalScans = series.reduce((s: number, d: any) => s + d.count, 0);
+                  const avgDaily = series.length ? (totalScans / series.length).toFixed(1) : '0';
+                  const maxDay = series.length ? series.reduce((m: any, d: any) => d.count > (m?.count || 0) ? d : m, series[0]) : null;
+                  // Trend: compare last half vs first half
+                  const mid = Math.floor(series.length / 2);
+                  const firstHalf = series.slice(0, mid).reduce((s: number, d: any) => s + d.count, 0);
+                  const secondHalf = series.slice(mid).reduce((s: number, d: any) => s + d.count, 0);
+                  const trendUp = secondHalf >= firstHalf;
+                  const trendPct = firstHalf > 0 ? Math.abs(((secondHalf - firstHalf) / firstHalf) * 100).toFixed(0) : '0';
+                  return (
+                    <div className="hidden md:flex items-center gap-6">
+                      <div className="text-right">
+                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Total</p>
+                        <p className="text-xl font-bold text-slate-900">{totalScans.toLocaleString()}</p>
+                      </div>
+                      <div className="w-px h-10 bg-slate-200" />
+                      <div className="text-right">
+                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Avg/day</p>
+                        <p className="text-xl font-bold text-slate-900">{avgDaily}</p>
+                      </div>
+                      <div className="w-px h-10 bg-slate-200" />
+                      <div className="text-right">
+                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Trend</p>
+                        <div className="flex items-center gap-1">
+                          {trendUp ? (
+                            <ArrowUpRight className="w-4 h-4 text-emerald-500" />
+                          ) : (
+                            <ArrowDownRight className="w-4 h-4 text-red-500" />
+                          )}
+                          <span className={`text-xl font-bold ${trendUp ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {trendPct}%
+                          </span>
+                        </div>
+                      </div>
+                      {maxDay && (
+                        <>
+                          <div className="w-px h-10 bg-slate-200" />
+                          <div className="text-right">
+                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Peak</p>
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-violet-500" />
+                              <span className="text-sm font-semibold text-slate-700">
+                                {new Date(maxDay.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </span>
+                              <span className="text-xs text-slate-400">({maxDay.count})</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
           </div>
-          <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={timeseries?.timeSeries || []}>
-              <defs>
-                <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} />
-              <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
-              <Legend />
-              <Area type="monotone" dataKey="count" name="Scans" stroke="#8b5cf6" strokeWidth={2} fill="url(#colorScans)" />
-            </AreaChart>
-          </ResponsiveContainer>
+
+          {/* Chart */}
+          {filteredTimeseries.length > 0 ? (
+          <>
+          <div className="px-4 pb-6">
+            <ResponsiveContainer width="100%" height={360}>
+              <AreaChart data={filteredTimeseries} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#7c3aed" stopOpacity={0.25} />
+                    <stop offset="50%" stopColor="#8b5cf6" stopOpacity={0.1} />
+                    <stop offset="100%" stopColor="#a78bfa" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="strokeGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#7c3aed" />
+                    <stop offset="50%" stopColor="#8b5cf6" />
+                    <stop offset="100%" stopColor="#a78bfa" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid 
+                  strokeDasharray="0" 
+                  stroke="#f1f5f9" 
+                  vertical={false}
+                />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="#94a3b8" 
+                  fontSize={11}
+                  fontWeight={500}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e2e8f0' }}
+                  tickMargin={12}
+                  tickFormatter={(value) => {
+                    const d = new Date(value);
+                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                  }}
+                />
+                <YAxis 
+                  stroke="#94a3b8" 
+                  fontSize={11}
+                  fontWeight={500}
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  allowDecimals={false}
+                />
+                <Tooltip 
+                  content={({ active, payload, label }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = new Date(label);
+                    const dateStr = d.toLocaleDateString('en-US', { 
+                      weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' 
+                    });
+                    return (
+                      <div className="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700">
+                        <p className="text-xs text-slate-400 mb-1">{dateStr}</p>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full bg-violet-400" />
+                          <span className="text-sm font-medium">{payload[0].value?.toLocaleString()} scans</span>
+                        </div>
+                      </div>
+                    );
+                  }}
+                  cursor={{ stroke: '#8b5cf6', strokeWidth: 1, strokeDasharray: '5 5' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="count" 
+                  name="Scans" 
+                  stroke="url(#strokeGradient)" 
+                  strokeWidth={2.5}
+                  fill="url(#colorScans)"
+                  dot={false}
+                  activeDot={{ 
+                    r: 6, 
+                    stroke: '#7c3aed', 
+                    strokeWidth: 2, 
+                    fill: 'white',
+                    filter: 'drop-shadow(0 2px 4px rgba(124, 58, 237, 0.3))'
+                  }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Bottom insight bar */}
+          {(() => {
+            const series = filteredTimeseries;
+            if (series.length < 2) return null;
+            const sorted = [...series].sort((a: any, b: any) => b.count - a.count);
+            const busiest = sorted[0];
+            const quietest = sorted[sorted.length - 1];
+            return (
+              <div className="border-t border-slate-100 bg-slate-50/50 px-8 py-3 flex items-center justify-between">
+                <p className="text-xs text-slate-500">
+                  <span className="font-medium text-slate-700">Busiest day:</span>{' '}
+                  {new Date(busiest.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                  {' '}({busiest.count} scans)
+                </p>
+                <p className="text-xs text-slate-500">
+                  <span className="font-medium text-slate-700">Quietest day:</span>{' '}
+                  {new Date(quietest.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                  {' '}({quietest.count} scans)
+                </p>
+              </div>
+            );
+          })()}
+          </>
+          ) : (
+            <EmptyState icon={TrendingUp} title="No scan data yet" subtitle="Scan trends will appear once your QR code is scanned" />
+          )}
         </div>
 
-        {/* Device Analytics - Modern Horizontal Bars */}
+        {/* Device Analytics - Donut + Bars */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Device Type */}
+          {/* Device Type - Donut Chart */}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">Device Type</h2>
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Smartphone className="w-5 h-5 text-violet-500" />
+                <h2 className="text-lg font-semibold text-slate-900">Device Type</h2>
+              </div>
               <p className="text-xs text-slate-500">Distribution by device category</p>
             </div>
-            <div className="space-y-4">
-              {(devices?.byDeviceType || []).map((device: any, index: number) => {
-                const total = devices?.byDeviceType.reduce((sum: number, d: any) => sum + d.count, 0) || 1;
-                const percentage = ((device.count / total) * 100).toFixed(1);
-                const colors = ['#8b5cf6', '#6366f1', '#a855f7'];
-                return (
-                  <div key={index}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-slate-700 capitalize">{device.deviceType}</span>
-                      <span className="text-sm font-semibold text-slate-900">{percentage}%</span>
-                    </div>
-                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all duration-500" 
-                        style={{ width: `${percentage}%`, backgroundColor: colors[index % 3] }}
-                      />
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1">{device.count.toLocaleString()} scans</div>
-                  </div>
-                );
-              })}
-            </div>
+            {(devices?.byDeviceType || []).length > 0 ? (
+              <>
+                <div className="flex justify-center">
+                  <ResponsiveContainer width="100%" height={180}>
+                    <PieChart>
+                      <Pie
+                        data={devices.byDeviceType}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={80}
+                        paddingAngle={3}
+                        dataKey="count"
+                        nameKey="deviceType"
+                        stroke="none"
+                      >
+                        {devices.byDeviceType.map((_: any, index: number) => (
+                          <Cell key={index} fill={DEVICE_COLORS[index % DEVICE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<DarkTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="space-y-3 mt-2">
+                  {devices.byDeviceType.map((device: any, index: number) => {
+                    const total = devices.byDeviceType.reduce((sum: number, d: any) => sum + d.count, 0) || 1;
+                    const percentage = ((device.count / total) * 100).toFixed(1);
+                    return (
+                      <div key={index} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: DEVICE_COLORS[index % DEVICE_COLORS.length] }} />
+                          <span className="text-slate-600">{deviceIcon(device.deviceType)}</span>
+                          <span className="text-sm font-medium text-slate-700 capitalize">{device.deviceType}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-900">{percentage}%</span>
+                          <span className="text-xs text-slate-400">({device.count})</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <EmptyState icon={Smartphone} title="No device data yet" subtitle="Device breakdowns appear after users scan your QR code" />
+            )}
           </div>
 
           {/* Operating System */}
@@ -298,28 +611,33 @@ export default function AnalyticsDashboardPage() {
               <h2 className="text-lg font-semibold text-slate-900 mb-2">Operating System</h2>
               <p className="text-xs text-slate-500">User platform breakdown</p>
             </div>
-            <div className="space-y-4">
-              {(devices?.byOS || []).map((os: any, index: number) => {
-                const total = devices?.byOS.reduce((sum: number, o: any) => sum + o.count, 0) || 1;
-                const percentage = ((os.count / total) * 100).toFixed(1);
-                const colors = ['#10b981', '#22c55e', '#14b8a6', '#0ea5e9', '#06b6d4'];
-                return (
-                  <div key={index}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-slate-700">{os.os}</span>
-                      <span className="text-sm font-semibold text-slate-900">{percentage}%</span>
+            {(devices?.byOS || []).length > 0 ? (
+              <div className="space-y-4">
+                {devices.byOS.map((os: any, index: number) => {
+                  const total = devices.byOS.reduce((sum: number, o: any) => sum + o.count, 0) || 1;
+                  const percentage = ((os.count / total) * 100).toFixed(1);
+                  const colors = ['#10b981', '#22c55e', '#14b8a6', '#0ea5e9', '#06b6d4'];
+                  const displayName = os.version ? `${os.os} ${os.version}` : os.os;
+                  return (
+                    <div key={index}>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-slate-700">{displayName}</span>
+                        <span className="text-sm font-semibold text-slate-900">{percentage}%</span>
+                      </div>
+                      <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full rounded-full transition-all duration-500" 
+                          style={{ width: `${percentage}%`, backgroundColor: colors[index % 5] }}
+                        />
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">{os.count.toLocaleString()} scans</div>
                     </div>
-                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all duration-500" 
-                        style={{ width: `${percentage}%`, backgroundColor: colors[index % 5] }}
-                      />
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1">{os.count.toLocaleString()} scans</div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState icon={BarChart3} title="No OS data yet" subtitle="OS breakdowns appear after users scan your QR code" />
+            )}
           </div>
 
           {/* Browser */}
@@ -328,28 +646,33 @@ export default function AnalyticsDashboardPage() {
               <h2 className="text-lg font-semibold text-slate-900 mb-2">Browser</h2>
               <p className="text-xs text-slate-500">Browser usage statistics</p>
             </div>
-            <div className="space-y-4">
-              {(devices?.byBrowser || []).map((browser: any, index: number) => {
-                const total = devices?.byBrowser.reduce((sum: number, b: any) => sum + b.count, 0) || 1;
-                const percentage = ((browser.count / total) * 100).toFixed(1);
-                const colors = ['#3b82f6', '#f59e0b', '#0ea5e9', '#ef4444'];
-                return (
-                  <div key={index}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-slate-700">{browser.browser}</span>
-                      <span className="text-sm font-semibold text-slate-900">{percentage}%</span>
+            {(devices?.byBrowser || []).length > 0 ? (
+              <div className="space-y-4">
+                {devices.byBrowser.map((browser: any, index: number) => {
+                  const total = devices.byBrowser.reduce((sum: number, b: any) => sum + b.count, 0) || 1;
+                  const percentage = ((browser.count / total) * 100).toFixed(1);
+                  const colors = ['#3b82f6', '#f59e0b', '#0ea5e9', '#ef4444'];
+                  const displayName = browser.version ? `${browser.browser} ${browser.version.split('.')[0]}` : browser.browser;
+                  return (
+                    <div key={index}>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-slate-700">{displayName}</span>
+                        <span className="text-sm font-semibold text-slate-900">{percentage}%</span>
+                      </div>
+                      <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full rounded-full transition-all duration-500" 
+                          style={{ width: `${percentage}%`, backgroundColor: colors[index % 4] }}
+                        />
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">{browser.count.toLocaleString()} scans</div>
                     </div>
-                    <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all duration-500" 
-                        style={{ width: `${percentage}%`, backgroundColor: colors[index % 4] }}
-                      />
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1">{browser.count.toLocaleString()} scans</div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState icon={Globe} title="No browser data yet" subtitle="Browser breakdowns appear after users scan your QR code" />
+            )}
           </div>
         </div>
 
@@ -387,14 +710,14 @@ export default function AnalyticsDashboardPage() {
                     <stop offset="100%" stopColor="#a855f7" stopOpacity={0.3} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="hour" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} />
+                <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="hour" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={{ stroke: '#e2e8f0' }} />
+                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                  formatter={(value: any) => [value, 'Scans']}
+                  content={<DarkTooltip formatter={{ label: (v: any) => `${v}:00` }} />}
+                  cursor={{ fill: 'rgba(139, 92, 246, 0.08)' }}
                 />
-                <Bar dataKey="count" fill="url(#hourGradient)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="scans" fill="url(#hourGradient)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
             {/* Business Insights */}
@@ -445,19 +768,21 @@ export default function AnalyticsDashboardPage() {
                     <stop offset="100%" stopColor="#22c55e" stopOpacity={0.3} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false} />
                 <XAxis 
                   dataKey="dayName" 
-                  stroke="#64748b" 
-                  fontSize={12}
+                  stroke="#94a3b8" 
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e2e8f0' }}
                   tickFormatter={(value) => value.substring(0, 3)}
                 />
-                <YAxis stroke="#64748b" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                  formatter={(value: any) => [value, 'Scans']}
+                  content={<DarkTooltip />}
+                  cursor={{ fill: 'rgba(16, 185, 129, 0.08)' }}
                 />
-                <Bar dataKey="count" fill="url(#dayGradient)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="scans" fill="url(#dayGradient)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
             {/* Business Insights */}
@@ -499,6 +824,7 @@ export default function AnalyticsDashboardPage() {
             </div>
           </div>
 
+          {(geographic?.byCountry?.length > 0 || geographic?.byCity?.length > 0) ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Top Countries */}
             <div>
@@ -508,7 +834,7 @@ export default function AnalyticsDashboardPage() {
                   <div key={index} className="group">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-slate-400 w-6">{index + 1}</span>
+                        <span className="text-lg">{countryToFlag(country.country)}</span>
                         <span className="font-medium text-slate-900">{country.country}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -534,7 +860,7 @@ export default function AnalyticsDashboardPage() {
                 {(geographic?.byCity || []).slice(0, 6).map((city: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-slate-50 to-blue-50 hover:from-slate-100 hover:to-blue-100 transition-colors">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <MapPin className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <span className="text-base">{countryToFlag(city.country)}</span>
                       <div className="min-w-0">
                         <p className="font-medium text-slate-900 truncate">{city.city}</p>
                         <p className="text-xs text-slate-500">{city.country}</p>
@@ -556,6 +882,9 @@ export default function AnalyticsDashboardPage() {
               </div>
             </div>
           </div>
+          ) : (
+            <EmptyState icon={Globe} title="No geographic data yet" subtitle="Location data appears after users scan your QR code from different regions" />
+          )}
         </div>
 
         {/* User Engagement & CTA Performance */}
@@ -623,42 +952,42 @@ export default function AnalyticsDashboardPage() {
             )}
           </div>
 
-          {/* Traffic Sources - Enhanced */}
+          {/* Traffic Sources */}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-1">
-                <ExternalLink className="w-5 h-5 text-violet-500" />
-                <h2 className="text-lg font-semibold text-slate-900">CTA Performance</h2>
+                <ExternalLink className="w-5 h-5 text-emerald-500" />
+                <h2 className="text-lg font-semibold text-slate-900">Traffic Sources</h2>
               </div>
-              <p className="text-xs text-slate-500">Button click-through rates</p>
+              <p className="text-xs text-slate-500">Where your visitors are coming from</p>
             </div>
-            {ctaButtons?.buttons && ctaButtons.buttons.length > 0 ? (
-              <div className="space-y-4">
-                {ctaButtons.buttons.slice(0, 6).map((button: any, index: number) => (
-                  <div key={index} className="p-4 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex-1">
-                        <p className="font-medium text-slate-900 mb-1">{button.label}</p>
-                        <p className="text-xs text-slate-500 truncate">{button.url}</p>
+            {referrers?.referrers && referrers.referrers.length > 0 ? (
+              <div className="space-y-3">
+                {referrers.referrers.slice(0, 6).map((referrer: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+                        <Globe className="w-4 h-4 text-white" />
                       </div>
-                      <div className="text-right ml-4">
-                        <p className="text-lg font-bold text-violet-600">{button.clickThroughRate}%</p>
-                        <p className="text-xs text-slate-500">CTR</p>
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-900 truncate text-sm">{referrer.domain || referrer.referrer}</p>
+                        <p className="text-xs text-slate-400">{referrer.views.toLocaleString()} views</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-3">
-                      <MousePointer className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-600">{button.clicks.toLocaleString()} clicks</span>
+                    <div className="flex items-center gap-3 ml-3">
+                      <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
+                          style={{ width: `${referrer.percentage}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-slate-700 w-12 text-right">{referrer.percentage}%</span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <ExternalLink className="w-12 h-12 text-slate-300 mb-3" />
-                <p className="text-slate-500 text-sm">No CTA button clicks yet</p>
-                <p className="text-slate-400 text-xs mt-1">Clicks will appear once users interact with buttons</p>
-              </div>
+              <EmptyState icon={ExternalLink} title="No traffic source data" subtitle="Referrer data appears when visitors come from external links" />
             )}
           </div>
         </div>
@@ -674,62 +1003,74 @@ export default function AnalyticsDashboardPage() {
               <p className="text-xs text-slate-500">User journey from scan to lead</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-2 mb-8 items-center">
               {/* Stage 1: Scans */}
-              <div className="relative">
-                <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
+              <div className="md:col-span-1">
+                <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <MousePointer className="w-6 h-6 text-white" />
+                    <div className="w-11 h-11 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <MousePointer className="w-5 h-5 text-white" />
                     </div>
                     <p className="text-xs text-slate-600 mb-1">QR Scans</p>
                     <p className="text-2xl font-bold text-slate-900">{funnel.scans.toLocaleString()}</p>
-                    <p className="text-xs text-slate-500 mt-2">100%</p>
+                    <p className="text-xs text-slate-500 mt-1">100%</p>
                   </div>
                 </div>
-                <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-4 bg-blue-500 rounded-full transform -translate-y-1/2 z-10"></div>
+              </div>
+
+              {/* Arrow 1 */}
+              <div className="hidden md:flex items-center justify-center">
+                <ChevronRight className="w-6 h-6 text-slate-300" />
               </div>
 
               {/* Stage 2: Views */}
-              <div className="relative">
-                <div className="p-6 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border-2 border-violet-200">
+              <div className="md:col-span-1">
+                <div className="p-5 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border-2 border-violet-200">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-violet-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Users className="w-6 h-6 text-white" />
+                    <div className="w-11 h-11 bg-violet-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Users className="w-5 h-5 text-white" />
                     </div>
                     <p className="text-xs text-slate-600 mb-1">Microsite Views</p>
                     <p className="text-2xl font-bold text-slate-900">{funnel.views.toLocaleString()}</p>
-                    <p className="text-xs text-emerald-600 font-semibold mt-2">{funnel.viewRate}%</p>
+                    <p className="text-xs text-emerald-600 font-semibold mt-1">{funnel.viewRate}%</p>
                   </div>
                 </div>
-                <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-4 bg-violet-500 rounded-full transform -translate-y-1/2 z-10"></div>
+              </div>
+
+              {/* Arrow 2 */}
+              <div className="hidden md:flex items-center justify-center">
+                <ChevronRight className="w-6 h-6 text-slate-300" />
               </div>
 
               {/* Stage 3: Clicks */}
-              <div className="relative">
-                <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200">
+              <div className="md:col-span-1">
+                <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <MousePointer className="w-6 h-6 text-white" />
+                    <div className="w-11 h-11 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <MousePointer className="w-5 h-5 text-white" />
                     </div>
                     <p className="text-xs text-slate-600 mb-1">Button Clicks</p>
                     <p className="text-2xl font-bold text-slate-900">{funnel.clicks.toLocaleString()}</p>
-                    <p className="text-xs text-emerald-600 font-semibold mt-2">{funnel.clickRate}% CTR</p>
+                    <p className="text-xs text-emerald-600 font-semibold mt-1">{funnel.clickRate}% CTR</p>
                   </div>
                 </div>
-                <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-4 bg-amber-500 rounded-full transform -translate-y-1/2 z-10"></div>
+              </div>
+
+              {/* Arrow 3 */}
+              <div className="hidden md:flex items-center justify-center">
+                <ChevronRight className="w-6 h-6 text-slate-300" />
               </div>
 
               {/* Stage 4: Leads */}
-              <div>
-                <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200">
+              <div className="md:col-span-1">
+                <div className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border-2 border-emerald-200">
                   <div className="text-center">
-                    <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <TrendingUp className="w-6 h-6 text-white" />
+                    <div className="w-11 h-11 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                     <p className="text-xs text-slate-600 mb-1">Leads Captured</p>
                     <p className="text-2xl font-bold text-slate-900">{funnel.leads.toLocaleString()}</p>
-                    <p className="text-xs text-emerald-600 font-semibold mt-2">{funnel.leadConversionRate}%</p>
+                    <p className="text-xs text-emerald-600 font-semibold mt-1">{funnel.leadConversionRate}%</p>
                   </div>
                 </div>
               </div>
@@ -765,62 +1106,6 @@ export default function AnalyticsDashboardPage() {
                     : "Simplify your lead capture form."}
                 </p>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Traffic Sources & Lead Generation Platforms */}
-        {referrers?.referrers && referrers.referrers.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-8">
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-1">
-                <Globe className="w-5 h-5 text-emerald-500" />
-                <h2 className="text-lg font-semibold text-slate-900">Lead Generation Platforms</h2>
-              </div>
-              <p className="text-xs text-slate-500">Traffic sources driving views and potential leads</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {referrers.referrers.slice(0, 9).map((referrer: any, index: number) => {
-                // Calculate estimated leads from this source based on overall conversion rate
-                const estimatedLeads = funnel && funnel.views > 0 
-                  ? Math.round((referrer.views * (funnel.leads / funnel.views)))
-                  : 0;
-                
-                return (
-                  <div key={index} className="p-4 rounded-lg border-2 border-slate-200 hover:border-emerald-300 hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
-                        <Globe className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 truncate">
-                          {referrer.domain || referrer.referrer}
-                        </p>
-                        <p className="text-xs text-slate-500">{referrer.views.toLocaleString()} views</p>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div>
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs text-slate-600">Traffic Share</span>
-                          <span className="text-sm font-semibold text-slate-900">{referrer.percentage}%</span>
-                        </div>
-                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full"
-                            style={{ width: `${referrer.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                      {estimatedLeads > 0 && (
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-200">
-                          <span className="text-xs text-slate-600">Est. Leads</span>
-                          <span className="text-sm font-bold text-emerald-600">~{estimatedLeads}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         )}

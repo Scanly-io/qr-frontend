@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import { usePayment } from '@/contexts/PaymentContext';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface FloatingCartButtonProps {
   onClick: () => void;
@@ -16,9 +17,14 @@ export function FloatingCartButton({ onClick, theme }: FloatingCartButtonProps) 
 
   if (cartCount === 0) return null;
 
+  const handleClick = () => {
+    trackCTA('floating-cart', `View Cart ($${cartTotal.toFixed(2)}, ${cartCount} items)`, '', 'cart');
+    onClick();
+  };
+
   return (
     <motion.button
-      onClick={onClick}
+      onClick={handleClick}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0, opacity: 0 }}

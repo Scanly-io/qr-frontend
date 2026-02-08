@@ -4,6 +4,7 @@ import { MapPin, Navigation, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { spacing, shadows, animations, borders } from '@/utils/designSystem';
 import { getTitleFont, getBodyFont } from '@/lib/themeHelpers';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface MapBlockProps {
   block: Block;
@@ -78,6 +79,7 @@ export default function MapBlock({ block, theme }: MapBlockProps) {
               {...animations.hover.scale}
               {...animations.tap}
               href={getDirectionsUrl()}
+              onClick={() => trackCTA(block.id, 'Get Directions', getDirectionsUrl(), 'map')}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm font-semibold text-white transition-all"
@@ -130,6 +132,7 @@ export default function MapBlock({ block, theme }: MapBlockProps) {
               
               <a
                 href={getDirectionsUrl()}
+                onClick={() => trackCTA(block.id, 'Get Directions', getDirectionsUrl(), 'map')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-shrink-0 p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
@@ -168,6 +171,7 @@ export default function MapBlock({ block, theme }: MapBlockProps) {
           </div>
           <a
             href={getDirectionsUrl()}
+            onClick={() => trackCTA(block.id, 'Get Directions', getDirectionsUrl(), 'map')}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-medium hover:underline"
@@ -213,6 +217,7 @@ export default function MapBlock({ block, theme }: MapBlockProps) {
               
               <a
                 href={getDirectionsUrl()}
+                onClick={() => trackCTA(block.id, 'Get Directions', getDirectionsUrl(), 'map')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105"
@@ -261,6 +266,7 @@ export default function MapBlock({ block, theme }: MapBlockProps) {
               <div className="flex flex-col sm:flex-row gap-3">
                 <a
                   href={getDirectionsUrl()}
+                  onClick={() => trackCTA(block.id, 'Get Directions', getDirectionsUrl(), 'map')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105"
@@ -310,6 +316,7 @@ export default function MapBlock({ block, theme }: MapBlockProps) {
           <div className="absolute top-4 right-4 flex flex-col gap-2">
             <a
               href={getDirectionsUrl()}
+              onClick={() => trackCTA(block.id, 'Get Directions', getDirectionsUrl(), 'map')}
               target="_blank"
               rel="noopener noreferrer"
               className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-200 hover:scale-110"

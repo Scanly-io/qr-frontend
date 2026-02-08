@@ -19,15 +19,15 @@ export default function Toast({ id, message, type = 'info', duration = 3000, onC
   }, [id, duration, onClose]);
 
   const icons = {
-    success: <CheckCircle className="w-5 h-5 text-green-500" />,
-    error: <AlertCircle className="w-5 h-5 text-red-500" />,
-    info: <Info className="w-5 h-5 text-blue-500" />,
+    success: <CheckCircle className="w-5 h-5 text-emerald-600" />,
+    error: <AlertCircle className="w-5 h-5 text-red-600" />,
+    info: <Info className="w-5 h-5 text-blue-600" />,
   };
 
   const backgrounds = {
-    success: 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800',
-    error: 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800',
-    info: 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800',
+    success: 'bg-emerald-100 border-emerald-300 text-emerald-900',
+    error: 'bg-red-100 border-red-300 text-red-900',
+    info: 'bg-blue-100 border-blue-300 text-blue-900',
   };
 
   return (

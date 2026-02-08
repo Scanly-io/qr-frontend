@@ -54,6 +54,8 @@ export const useAuthStore = create<AuthState>()(
           refreshToken: null,
           isAuthenticated: false,
         });
+        // Clear persisted storage
+        localStorage.removeItem('auth-storage');
       },
 
       // Login

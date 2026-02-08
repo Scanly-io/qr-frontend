@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Force dark mode to only activate via .dark class, not system preference */
+/* This prevents Tailwind v4 from auto-applying dark: variants */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Prevent system dark mode from affecting the editor */
 @media (prefers-color-scheme: dark) {
   .editor-panel-light {

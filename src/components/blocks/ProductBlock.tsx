@@ -24,6 +24,7 @@ import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import { usePayment } from '@/contexts/PaymentContext';
 import {shadows, animations} from '@/utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface ProductBlockProps {
   block: Block;
@@ -124,6 +125,7 @@ export default function ProductBlock({
     
     // If external URL is set, navigate there
     if (buttonUrl && !useStripeCheckout) {
+      trackCTA(block.id, buttonText || 'Buy Now', buttonUrl, 'product');
       window.open(buttonUrl, '_blank', 'noopener,noreferrer');
       return;
     }

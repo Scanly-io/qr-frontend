@@ -34,6 +34,7 @@ import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import { integrationsApi } from '@/lib/api/integrations';
 import { spacing, animations, borders } from '@/utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 
 interface PaymentBlockProps {
@@ -191,6 +192,7 @@ export default function PaymentBlock({
     
     // If Stripe Payment Link is configured, use it
     if (stripePaymentLink) {
+      trackCTA(block.id, 'Pay with Stripe', stripePaymentLink, 'payment');
       if (checkoutExperience === 'embedded') {
         // Open in an iframe/overlay (embedded experience)
         window.open(stripePaymentLink, 'stripe-checkout', 'width=600,height=800,scrollbars=yes');
