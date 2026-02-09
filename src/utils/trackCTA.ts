@@ -25,7 +25,7 @@ export function trackCTA(
   blockType?: string,
 ) {
   try {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+    const API_BASE_URL = import.meta.env.VITE_API_URL || '';
     const slug = _qrSlug || window.location.pathname.split('/public/')[1]?.split('/')[0];
 
     if (!slug) return;

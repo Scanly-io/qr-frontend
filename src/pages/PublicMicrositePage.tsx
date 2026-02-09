@@ -7,7 +7,7 @@ import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { setTrackingSlug } from '@/utils/trackCTA';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 interface MicrositePublicData {
   id: string;

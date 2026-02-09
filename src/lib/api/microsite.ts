@@ -95,7 +95,7 @@ export const micrositeApi = {
    */
   getPublic: async (qrId: string): Promise<string> => {
     // This returns HTML, not JSON
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost'}/public/${qrId}`);
+    const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/public/${qrId}`);
     if (!response.ok) {
       throw new Error(`Failed to load microsite: ${response.status}`);
     }

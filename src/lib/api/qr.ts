@@ -56,7 +56,7 @@ export const qrApi = {
    * Get QR code image URL
    */
   getImageUrl: (qrId: string): string => {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost';
+    const baseUrl = import.meta.env.VITE_API_URL || '';
     return `${baseUrl}/qr/${qrId}/image`;
   },
 

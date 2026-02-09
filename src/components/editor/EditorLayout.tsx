@@ -23,13 +23,13 @@ import DeviceFrame from './DeviceFrame';
 import BlockInspector from './BlockInspector';
 import TemplatesSidebar from './TemplatesSidebar';
 import { ThemeGallery } from './ThemeGallery';
-import { AIAssistantPanel } from './AIAssistantPanel';
 import { PreviewModal } from './PreviewModal';
 // import EditorToolbar from './EditorToolbar'; // TODO: Refactor to use this component
 import QRGenerationModal from './QRGenerationModal';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { HelpPanel } from '@/components/HelpPanel';
 import { ToastContainer, type ToastProps } from '@/components/ui/Toast';
+import { ComingSoonBadge } from '@/components/ui/ComingSoonBadge';
 import { KeyboardShortcutsPanel } from '@/components/accessibility/KeyboardShortcutsPanel';
 import type { Block, BlockType } from '@/types';
 import { PRESET_THEMES, type PageTheme } from '@/types/theme';
@@ -864,7 +864,7 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
               </button>
               <button
                 onClick={() => { setSidebarTab('ai'); setSelectedBlockId(null); }}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 relative ${
                   sidebarTab === 'ai'
                     ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/30 scale-105'
                     : 'text-slate-600 hover:bg-white/60 backdrop-blur-sm'
@@ -872,6 +872,9 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
               >
                 <Sparkles className="w-4 h-4" />
                 <span className="hidden sm:inline">AI</span>
+                <span className="absolute -top-1.5 -right-1 px-1 py-0.5 text-[8px] font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full leading-none shadow-sm">
+                  Soon
+                </span>
               </button>
             </div>
           </div>
@@ -886,13 +889,33 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
                 />
               </div>
             ) : sidebarTab === 'ai' ? (
-              <div className="h-full">
-                <AIAssistantPanel 
-                  micrositeId={micrositeId}
-                  onApplyRecommendation={() => {
-                    loadMicrosite();
-                  }}
-                />
+              <div className="h-full flex items-center justify-center p-6">
+                <div className="text-center space-y-4 max-w-xs">
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800">AI Assistant</h3>
+                    <ComingSoonBadge />
+                  </div>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    AI-powered content suggestions, smart layouts, and automatic optimization are coming in the next release.
+                  </p>
+                  <div className="space-y-2 text-left">
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                      Smart content generation
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                      Auto layout optimization
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                      Performance recommendations
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="p-4">{/* Design Tab Content */}

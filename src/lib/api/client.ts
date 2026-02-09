@@ -10,7 +10,7 @@
  */
 
 // API Gateway URL (nginx on port 80)
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
