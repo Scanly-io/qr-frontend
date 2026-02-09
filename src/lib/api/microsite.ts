@@ -63,7 +63,8 @@ export const micrositeApi = {
     message: string;
     qrId: string;
     publicUrl: string;
-    qrImageUrl: string;
+    qrDataUrl: string;
+    qrSvg: string;
     shareUrl: string;
   }> => {
     return api.post(`/microsite/${id}/generate-qr`);
