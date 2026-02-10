@@ -62,6 +62,13 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
       comingSoon: true,
     },
     {
+      name: 'Account',
+      href: '/account',
+      icon: UserCircle,
+      current: location.pathname === '/account',
+      comingSoon: false,
+    },
+    {
       name: 'Settings',
       href: '/settings',
       icon: Settings,
