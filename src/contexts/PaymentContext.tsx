@@ -12,12 +12,13 @@
  * - Appointment pre-payments
  */
 
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import type { Stripe } from '@stripe/stripe-js';
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
-import { X, Shield, Lock, CreditCard } from 'lucide-react';
+import { X, Shield, Lock } from 'lucide-react';
 import { StripeIcon, BrandColors } from '@/components/icons/BrandIcons';
 
 // Types

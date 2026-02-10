@@ -4,7 +4,8 @@ import { Menu, X } from 'lucide-react';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { spacing, shadows, animations, borders } from '@/utils/designSystem';
+import { shadows, animations, borders } from '@/utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface HeaderBlockProps {
   block: Block;
@@ -186,6 +187,7 @@ export default function HeaderBlock({ block, theme }: HeaderBlockProps) {
                       {...animations.hover.scaleSmall}
                       {...animations.tap}
                       href={secondaryCtaUrl}
+                      onClick={() => trackCTA(block.id, secondaryCtaLabel, secondaryCtaUrl, 'header')}
                       className={`px-4 py-2 text-sm font-semibold rounded-lg border-2 transition-all ${
                         isGradient 
                           ? 'border-white/60 text-white hover:bg-white/10' 
@@ -205,6 +207,7 @@ export default function HeaderBlock({ block, theme }: HeaderBlockProps) {
                       {...animations.hover.scaleSmall}
                       {...animations.tap}
                       href={ctaUrl}
+                      onClick={() => trackCTA(block.id, ctaLabel, ctaUrl, 'header')}
                       className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
                         isGradient 
                           ? 'bg-white text-violet-600 hover:bg-slate-50' 
@@ -266,7 +269,7 @@ export default function HeaderBlock({ block, theme }: HeaderBlockProps) {
                     {showSecondaryCta && secondaryCtaLabel && (
                       <a
                         href={secondaryCtaUrl}
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={() => { trackCTA(block.id, secondaryCtaLabel, secondaryCtaUrl, 'header'); setMobileMenuOpen(false); }}
                         className={`block w-full py-3 text-center text-base font-semibold rounded-xl border-2 transition-colors ${
                           isGradient 
                             ? 'border-white/60 text-white active:bg-white/10' 
@@ -283,7 +286,7 @@ export default function HeaderBlock({ block, theme }: HeaderBlockProps) {
                     {showCta && ctaLabel && (
                       <a
                         href={ctaUrl}
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={() => { trackCTA(block.id, ctaLabel, ctaUrl, 'header'); setMobileMenuOpen(false); }}
                         className={`block w-full py-3 text-center text-base font-semibold rounded-xl transition-colors ${
                           isGradient 
                             ? 'bg-white text-violet-600 active:bg-slate-100' 

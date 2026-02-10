@@ -1,17 +1,14 @@
 import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Quote, Star, ChevronLeft, ChevronRight, Sparkles, Heart, MessageCircle } from 'lucide-react';
+import { Quote, Star, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { 
   spacing, 
-  typography, 
-  shadows, 
   borders, 
   animations, 
-  getCardStyles, 
-  getPrimaryShadow 
+  getCardStyles
 } from '@/utils/designSystem';
 
 interface TestimonialBlockProps {
@@ -136,9 +133,9 @@ export default function TestimonialBlock({ block, theme }: TestimonialBlockProps
           whileHover={{ scale: 1.05 }}
           className={`${sizeMap[size]} rounded-full overflow-hidden ring-2 shadow-lg`}
           style={{ 
-            ringColor: `${primaryColor}40`,
+            '--tw-ring-color': `${primaryColor}40`,
             boxShadow: `0 4px 15px ${primaryColor}20`
-          }}
+          } as React.CSSProperties}
         >
           <img
             src={item.avatar}

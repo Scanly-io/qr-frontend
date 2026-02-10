@@ -4,7 +4,6 @@ import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { Clock, Calendar, Timer, Sparkles, PartyPopper, Flame, Zap } from 'lucide-react';
-import { spacing, typography, shadows, animations } from '@/utils/designSystem';
 
 interface CountdownBlockProps {
   block: Block;

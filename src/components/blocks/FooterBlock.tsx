@@ -5,6 +5,7 @@ import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { spacing, shadows, animations, borders } from '@/utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface FooterBlockProps {
   block: Block;
@@ -36,6 +37,8 @@ const socialIcons: Record<string, string> = {
 export default function FooterBlock({ block, theme }: FooterBlockProps) {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+
+  const track = (label: string, url: string) => trackCTA(block.id, label, url, 'footer');
   
   // Content from block
   const text = (block.content.text as string) || '';
@@ -193,6 +196,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
                   <a
                     key={idx}
                     href={link.url}
+                    onClick={() => trackCTA(block.id, link.label, link.url, 'footer')}
                     className={`text-sm py-1 ${styles.linkHover} ${styles.text}`}
                   >
                     {link.label}
@@ -210,6 +214,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
                   <motion.a
                     key={idx}
                     href={social.url}
+                    onClick={() => track(social.platform, social.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`transition-all ${styles.socialBg} ${styles.text}`}
@@ -273,6 +278,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
                   <a
                     key={idx}
                     href={link.url}
+                    onClick={() => track(link.label, link.url)}
                     className={`text-sm ${styles.linkHover} ${styles.text}`}
                   >
                     {link.label}
@@ -293,6 +299,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
                   <a
                     key={idx}
                     href={social.url}
+                    onClick={() => track(social.platform, social.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`p-1.5 rounded transition-colors ${styles.text} ${styles.linkHover}`}
@@ -358,6 +365,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
                   <a
                     key={idx}
                     href={link.url}
+                    onClick={() => track(link.label, link.url)}
                     className={`text-sm font-medium ${styles.linkHover} ${styles.text}`}
                   >
                     {link.label}
@@ -375,6 +383,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
                   <a
                     key={idx}
                     href={social.url}
+                    onClick={() => track(social.platform, social.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`p-2.5 rounded-full ${styles.socialBg} ${styles.text} transition-all hover:scale-110`}
@@ -445,6 +454,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
                   <a
                     key={idx}
                     href={social.url}
+                    onClick={() => track(social.platform, social.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 transition-all text-slate-400 hover:text-white hover:scale-105"
@@ -505,7 +515,8 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
                     {links.map((link, idx) => (
                       <li key={idx}>
                         <a 
-                          href={link.url} 
+                          href={link.url}
+                          onClick={() => track(link.label, link.url)}
                           className={`text-sm transition-colors inline-flex items-center gap-1.5 group ${styles.text} ${styles.linkHover}`}
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-slate-600 group-hover:bg-violet-500 transition-colors flex-shrink-0" />

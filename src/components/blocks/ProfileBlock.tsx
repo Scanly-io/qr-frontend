@@ -4,7 +4,7 @@ import { User, BadgeCheck, MapPin } from 'lucide-react';
 import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
-import { spacing, typography, shadows, animations } from '@/utils/designSystem';
+import { spacing, animations } from '@/utils/designSystem';
 
 interface ProfileBlockProps {
   block: Block;

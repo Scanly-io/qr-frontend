@@ -10,7 +10,7 @@
  * - Webhook integration for order tracking
  */
 
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import { 
   CreditCard, 
   Heart, 
@@ -26,8 +26,6 @@ import {
   Minus,
   Trash2,
   Package,
-  ExternalLink,
-  Shield,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Block } from '@/types';
@@ -35,15 +33,9 @@ import type { PageTheme } from '@/types/theme';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import { integrationsApi } from '@/lib/api/integrations';
-import { spacing, shadows, animations, borders, getCardStyles, getPrimaryShadow } from '@/utils/designSystem';
+import { spacing, animations, borders } from '@/utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
-// Import payment provider icons
-import {
-  StripeIcon,
-  PayPalIcon,
-  VenmoIcon,
-  BrandColors,
-} from '@/components/icons/BrandIcons';
 
 interface PaymentBlockProps {
   block: Block;
@@ -200,6 +192,7 @@ export default function PaymentBlock({
     
     // If Stripe Payment Link is configured, use it
     if (stripePaymentLink) {
+      trackCTA(block.id, 'Pay with Stripe', stripePaymentLink, 'payment');
       if (checkoutExperience === 'embedded') {
         // Open in an iframe/overlay (embedded experience)
         window.open(stripePaymentLink, 'stripe-checkout', 'width=600,height=800,scrollbars=yes');

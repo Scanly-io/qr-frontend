@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, Store, Calendar, User, Rocket, Heart, ShoppingBag, Music, Camera, 
   Briefcase, Coffee, Gift, Star, Building, Scissors, Dumbbell, Home, 
-  X, Check, Layers, ArrowRight, Zap
+  X, Check, Layers, ArrowRight, Zap, Search
 } from 'lucide-react';
 import type { Block, BlockType } from '@/types';
 import type { PageTheme } from '@/types/theme';
@@ -161,14 +161,29 @@ const industryIconMap: Record<string, typeof Coffee> = {
   salon: Scissors,
   photographer: Camera,
   shop: ShoppingBag,
+  professional: Briefcase,
   default: Building,
 };
+
+// Category labels and icons for filter chips
+const industryCategories = [
+  { id: 'all', label: 'All', icon: Layers },
+  { id: 'restaurant', label: 'Restaurant', icon: Coffee },
+  { id: 'artist', label: 'Artist', icon: Music },
+  { id: 'real-estate', label: 'Real Estate', icon: Home },
+  { id: 'shop', label: 'Shop', icon: ShoppingBag },
+  { id: 'salon', label: 'Salon', icon: Scissors },
+  { id: 'fitness', label: 'Fitness', icon: Dumbbell },
+  { id: 'professional', label: 'Professional', icon: Briefcase },
+];
 
 type TabType = 'quick' | 'industry';
 
 export default function TemplatesSidebar({ onApplyTemplate, onApplyRichTemplate, onClose }: TemplatesSidebarProps) {
   const [activeTab, setActiveTab] = useState<TabType>('industry');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedIndustryCategory, setSelectedIndustryCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
 
   const categories = [
@@ -260,6 +275,39 @@ export default function TemplatesSidebar({ onApplyTemplate, onApplyRichTemplate,
                 exit={{ opacity: 0, y: -10 }}
                 className="p-4"
               >
+                {/* Search Bar */}
+                <div className="relative mb-3">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search templates..."
+                    className="w-full pl-9 pr-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 transition-all"
+                  />
+                </div>
+
+                {/* Industry Category Filter */}
+                <div className="flex gap-1.5 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+                  {industryCategories.map((cat) => {
+                    const CatIcon = cat.icon;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedIndustryCategory(cat.id)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-all ${
+                          selectedIndustryCategory === cat.id
+                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-300 dark:ring-emerald-700'
+                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                        }`}
+                      >
+                        <CatIcon className="w-3 h-3" />
+                        {cat.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 {/* Info Banner */}
                 <div className="mb-4 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
                   <div className="flex items-start gap-2">
@@ -272,7 +320,16 @@ export default function TemplatesSidebar({ onApplyTemplate, onApplyRichTemplate,
 
                 {/* Industry Template Grid */}
                 <div className="grid grid-cols-2 gap-3">
-                  {onApplyRichTemplate && INDUSTRY_TEMPLATES.map((template) => {
+                  {onApplyRichTemplate && INDUSTRY_TEMPLATES
+                    .filter((template) => {
+                      const matchesCategory = selectedIndustryCategory === 'all' || template.category === selectedIndustryCategory;
+                      const matchesSearch = !searchQuery || 
+                        template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                      return matchesCategory && matchesSearch;
+                    })
+                    .map((template) => {
                     const Icon = industryIconMap[template.category] || industryIconMap.default;
                     const isHovered = hoveredTemplate === template.id;
                     
@@ -307,9 +364,14 @@ export default function TemplatesSidebar({ onApplyTemplate, onApplyRichTemplate,
 
                         {/* Footer */}
                         <div className="relative z-10 flex items-center justify-between mt-3">
-                          <span className="text-white/60 text-[10px] font-medium">
-                            {template.blocks.length} blocks
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="px-1.5 py-0.5 bg-white/20 backdrop-blur-sm rounded text-white/80 text-[9px] font-medium capitalize">
+                              {template.category.replace('-', ' ')}
+                            </span>
+                            <span className="text-white/50 text-[10px] font-medium">
+                              {template.blocks.length} blocks
+                            </span>
+                          </div>
                           <motion.div
                             animate={{ x: isHovered ? 0 : -5, opacity: isHovered ? 1 : 0 }}
                             className="flex items-center gap-1 text-white text-xs font-medium"
@@ -327,6 +389,22 @@ export default function TemplatesSidebar({ onApplyTemplate, onApplyRichTemplate,
                     );
                   })}
                 </div>
+
+                {/* Empty state */}
+                {INDUSTRY_TEMPLATES.filter((t) => {
+                  const matchesCategory = selectedIndustryCategory === 'all' || t.category === selectedIndustryCategory;
+                  const matchesSearch = !searchQuery || 
+                    t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    t.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                  return matchesCategory && matchesSearch;
+                }).length === 0 && (
+                  <div className="text-center py-8">
+                    <Search className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
+                    <p className="text-sm text-zinc-500">No templates found</p>
+                    <p className="text-xs text-zinc-400 mt-1">Try a different category or search term</p>
+                  </div>
+                )}
               </motion.div>
             ) : (
               /* Quick Start Templates - Basic structure */

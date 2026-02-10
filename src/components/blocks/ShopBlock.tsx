@@ -31,18 +31,12 @@ import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import { integrationsApi } from '@/lib/api/integrations';
 import { 
-  spacing, 
-  typography, 
-  shadows, 
   borders, 
   animations, 
-  colors,
   getCardStyles,
-  getTextColor,
-  getPrimaryShadow,
-  staggerContainer,
-  staggerItem
+  getPrimaryShadow
 } from '../../utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface ShopBlockProps {
   block: Block;
@@ -97,7 +91,6 @@ export default function ShopBlock({
   const accentColor = (style?.accentColor as string) || '#8b5cf6';
   const textColor = (style?.textColor as string) || '#1f2937';
   const borderRadius = (style?.borderRadius as string) || 'rounded-2xl';
-  const cardStyle = (style?.cardStyle as string) || 'elevated'; // elevated, flat, bordered
 
   // Cart state
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -157,6 +150,7 @@ export default function ShopBlock({
   const addToCart = (product: Product) => {
     if (isEditing) return;
     if (product.inStock === false) return;
+    trackCTA(block.id, product.name, `shop-item-${product.id}`, 'shop');
     
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
@@ -201,6 +195,7 @@ export default function ShopBlock({
   const handleCheckout = async () => {
     if (isEditing || cart.length === 0) return;
     
+    trackCTA(block.id, `Checkout ($${cartTotal.toFixed(2)}, ${cart.length} items)`, '', 'shop-checkout');
     setIsProcessing(true);
     
     try {
@@ -263,14 +258,6 @@ export default function ShopBlock({
       case 'HOT': return <Zap className="w-3 h-3" />;
       case 'BEST': return <Heart className="w-3 h-3" />;
       default: return null;
-    }
-  };
-
-  const getCardClasses = () => {
-    switch (cardStyle) {
-      case 'flat': return 'bg-muted/30';
-      case 'bordered': return 'border-2 border-border bg-transparent';
-      default: return 'bg-white shadow-md hover:shadow-lg';
     }
   };
 

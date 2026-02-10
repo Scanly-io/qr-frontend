@@ -5,6 +5,7 @@ import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { animations } from '@/utils/designSystem';
 import { getBorderRadius } from '@/lib/themeHelpers';
+import { trackCTA } from '@/utils/trackCTA';
 
 // Import brand icons
 import {
@@ -259,7 +260,10 @@ export default function LinkButtonBlock({ block, isEditing, theme }: LinkButtonB
     }
     
     setIsLoading(true);
-    // Track click analytics would go here
+    
+    // Track button click analytics
+    trackCTA(block.id, title || 'Untitled Button', url, 'link-button');
+    
     setTimeout(() => setIsLoading(false), 600);
   };
 

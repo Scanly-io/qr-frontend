@@ -20,8 +20,6 @@ export function PageSettings({ theme, onChange }: PageSettingsProps) {
   const [isUploadingFavicon, setIsUploadingFavicon] = useState(false);
 
   const updateTheme = (updates: Partial<PageTheme>) => {
-    console.log('📝 Page theme update:', updates);
-    console.log('🎨 Current theme:', theme);
     const newTheme = { 
       ...theme, 
       ...updates,
@@ -33,7 +31,6 @@ export function PageSettings({ theme, onChange }: PageSettingsProps) {
       header: updates.header ? { ...theme.header, ...updates.header } : theme.header,
       footer: updates.footer ? { ...theme.footer, ...updates.footer } : theme.footer,
     };
-    console.log('✨ New theme:', newTheme);
     onChange(newTheme);
   };
 
@@ -216,6 +213,7 @@ export function PageSettings({ theme, onChange }: PageSettingsProps) {
                     onClick={() => {
                       const defaultPreset = THEME_PRESETS[0];
                       if (defaultPreset) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onChange(defaultPreset as any);
                       }
                     }}
@@ -233,7 +231,6 @@ export function PageSettings({ theme, onChange }: PageSettingsProps) {
                     <button
                       key={preset.id}
                       onClick={() => {
-                        console.log('🎨 Applying preset theme:', preset.name);
                         updateTheme({
                           ...theme,
                           ...preset.theme,
@@ -1207,7 +1204,6 @@ export function PageSettings({ theme, onChange }: PageSettingsProps) {
             {/* Save Button */}
             <button
               onClick={() => {
-                console.log('💾 Saving custom code:', { css: customCSS, html: customHTML });
                 // TODO: Save to theme or microsite metadata
                 alert('Custom code saved! (Feature in progress)');
               }}

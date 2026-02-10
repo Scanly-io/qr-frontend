@@ -12,7 +12,7 @@ import {
   Copy,
   Check
 } from 'lucide-react';
-import { spacing, typography, shadows, borders, animations, colors } from '@/utils/designSystem';
+import { spacing, typography, shadows, borders, colors } from '@/utils/designSystem';
 import { Skeleton, SkeletonCard, SkeletonAvatar, SkeletonButton, SkeletonTestimonial } from '@/components/ui/skeleton';
 
 export default function ShowcasePage() {

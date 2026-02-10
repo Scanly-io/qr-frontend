@@ -23,13 +23,13 @@ import DeviceFrame from './DeviceFrame';
 import BlockInspector from './BlockInspector';
 import TemplatesSidebar from './TemplatesSidebar';
 import { ThemeGallery } from './ThemeGallery';
-import { AIAssistantPanel } from './AIAssistantPanel';
 import { PreviewModal } from './PreviewModal';
 // import EditorToolbar from './EditorToolbar'; // TODO: Refactor to use this component
 import QRGenerationModal from './QRGenerationModal';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { HelpPanel } from '@/components/HelpPanel';
 import { ToastContainer, type ToastProps } from '@/components/ui/Toast';
+import { ComingSoonBadge } from '@/components/ui/ComingSoonBadge';
 import { KeyboardShortcutsPanel } from '@/components/accessibility/KeyboardShortcutsPanel';
 import type { Block, BlockType } from '@/types';
 import { PRESET_THEMES, type PageTheme } from '@/types/theme';
@@ -38,9 +38,6 @@ import { nanoid } from 'nanoid';
 import { micrositeApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { useLocation } from 'react-router-dom';
-import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
-import { useAnnouncer } from '@/hooks/useAnnouncer';
-import { useFocusManagement } from '@/hooks/useFocusManagement';
 
 interface EditorLayoutProps {
   micrositeId: string; // ID of the microsite being edited
@@ -185,7 +182,6 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
   // Load microsite from backend
   const loadMicrosite = async () => {
     if (!accessToken) {
-      console.warn('No access token, skipping microsite load');
       setIsLoading(false);
       alert('Please login first to edit microsites');
       return;
@@ -193,12 +189,10 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
 
     // Handle new microsite case
     if (micrositeId === 'new') {
-      console.log('✅ Creating new microsite');
       setIsLoading(false);
       setBlocks([]);
       setMicrositeName('New Microsite');
       setQrId('');
-      // Use default theme from context
       return;
     }
 
@@ -211,9 +205,7 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
       
       // Load theme - check both 'theme' field (new) and 'description' (legacy)
       if (data.theme && typeof data.theme === 'object' && 'id' in data.theme && 'name' in data.theme) {
-        // New format: full PageTheme stored in theme field
         setPageTheme(data.theme as PageTheme);
-        console.log('✅ Loaded theme from theme field:', (data.theme as PageTheme).name);
       } else {
         // Legacy: try loading from description JSON
         try {
@@ -221,26 +213,13 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
             const parsed = JSON.parse(data.description);
             if (parsed.fullTheme) {
               setPageTheme(parsed.fullTheme);
-              console.log('✅ Loaded theme from description (legacy):', parsed.fullTheme.name);
             }
           }
         } catch {
-          console.log('No saved theme found, using default');
+          // No saved theme found, using default
         }
       }
-      
-      const loadedBlocks = data.layout || [];
-      console.log('✅ Microsite loaded:', {
-        id: data.id,
-        title: data.title,
-        blocksCount: loadedBlocks.length,
-        blockTypes: [...new Set(blockTypes)],
-        allBlockTypes: blockTypes,
-        theme: pageTheme.name,
-      });
-      // TODO: Load theme, settings, etc.
     } catch (error) {
-      console.error('❌ Failed to load microsite:', error);
       alert('Failed to load microsite: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setIsLoading(false);
@@ -264,12 +243,10 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
         order: index,
       }));
       setBlocks(newBlocks);
-      console.log('✅ Applied template blocks:', locationState.templateBlocks);
     }
     
     if (locationState?.templateTheme) {
       setPageTheme(locationState.templateTheme);
-      console.log('✅ Applied template theme:', locationState.templateTheme.name);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationState]);
@@ -353,52 +330,23 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
 
   // Save handler - Save to backend
   const handleSave = async () => {
-    console.log('🔵 Save clicked!', { 
-      hasToken: !!accessToken, 
-      micrositeId, 
-      blocksCount: blocks.length
-    });
-
     if (!accessToken) {
-      console.error('❌ No access token!');
-      alert('Please login to save');
+      showToast('Please login to save', 'error');
       return;
     }
 
     setIsSaving(true);
     try {
-      const blockSummary = blocks.map(b => ({
-        id: b.id,
-        type: b.type,
-        hasContent: !!b.content,
-        contentKeys: Object.keys(b.content || {}),
-        contentSample: b.type === 'profile' ? b.content : undefined,
-      }));
-      
-      console.log('📤 Sending save request...', {
-        title: micrositeName,
-        layoutBlocks: blocks.length,
-        blockTypes: blocks.map(b => b.type),
-        blockDetails: blockSummary,
-        fullBlocks: blocks, // Log ALL blocks
-      });
-
       await micrositeApi.update(micrositeId, {
         title: micrositeName,
         layout: blocks,
-        theme: pageTheme, // ✅ Store full PageTheme object directly in theme field
-        description: '', // Clear description - don't put theme JSON here
+        theme: pageTheme,
+        description: '',
       });
 
       setLastSaved(new Date());
-      console.log('✅ Saved successfully!', {
-        savedBlocks: blocks.length,
-        blockTypes: [...new Set(blocks.map(b => b.type))],
-        theme: pageTheme.name,
-      });
       showToast(`✅ Saved ${blocks.length} blocks successfully!`, 'success');
     } catch (error) {
-      console.error('❌ Save failed:', error);
       showToast('Failed to save: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
     } finally {
       setIsSaving(false);
@@ -407,30 +355,20 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
 
   // Publish handler
   const handlePublish = async () => {
-    console.log('🔵 Publish clicked!', { hasToken: !!accessToken, qrId, micrositeId });
-
     if (!accessToken) {
-      console.error('❌ No access token!');
-      alert('Please login to publish');
+      showToast('Please login to publish', 'error');
       return;
     }
 
-    // Use qrId if available, otherwise use micrositeId as fallback
     const publishId = qrId || micrositeId;
-    console.log('📤 Publishing with ID:', publishId);
 
     setIsPublishing(true);
     try {
-      console.log('📤 Publishing microsite...');
-      // Save first
       await handleSave();
-      // Then publish using qrId or micrositeId
       await micrositeApi.publish(publishId);
-      console.log('✅ Published successfully!');
-      alert('✅ Published successfully!');
+      showToast('🚀 Published successfully! Your microsite is live.', 'success');
     } catch (error) {
-      console.error('❌ Publish failed:', error);
-      alert('Failed to publish: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      showToast('Failed to publish: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
     } finally {
       setIsPublishing(false);
     }
@@ -438,19 +376,13 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
 
   // Preview handler
   const handlePreview = async () => {
-    console.log('🔵 Preview clicked!', { qrId, micrositeId });
-
-    // Auto-save before preview
     try {
       await handleSave();
-      console.log('Auto-saved before preview');
-    } catch (error) {
-      console.error('Auto-save failed:', error);
+    } catch {
       showToast('Failed to save before preview', 'error');
       return;
     }
 
-    // Show preview modal instead of opening in new tab
     setShowPreviewModal(true);
     showToast('🔍 Opening preview...', 'info');
   };
@@ -581,9 +513,9 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
   };
 
   // QR Generation handler
-  const handleQRGenerated = (newQrId: string, qrUrl: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleQRGenerated = (newQrId: string, _qrUrl: string) => {
     setQrId(newQrId);
-    console.log('✅ QR Code generated:', { qrId: newQrId, qrUrl });
   };
 
   return (
@@ -621,7 +553,7 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
 
       {/* Loading Screen */}
       {isLoading && (
-        <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+        <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
           {/* Animated background */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
@@ -656,7 +588,7 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
 
       {/* Editor UI (shown when not loading) */}
       {!isLoading && (
-      <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="flex flex-col h-full bg-gradient-to-br from-slate-50 via-violet-50/30 to-purple-50/20">
         {/* MODERN TOP NAVIGATION - Glass Morphism */}
         <nav 
           role="navigation" 
@@ -759,6 +691,19 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
               </button>
             </Tooltip>
 
+            {/* Help / Re-trigger Onboarding */}
+            <Tooltip content="Help & Tour" side="bottom">
+              <button
+                onClick={() => setShowOnboarding(true)}
+                className="p-2.5 text-slate-600 hover:text-slate-900 hover:bg-white/60 rounded-xl transition-all duration-200"
+                aria-label="Show help and tutorial"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+            </Tooltip>
+
             <div className="w-px h-6 bg-slate-200" aria-hidden="true" />
 
             {/* Save */}
@@ -790,7 +735,7 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
         </nav>
         
         {/* MAIN EDITOR AREA - Modern gradient background matching template gallery */}
-        <div className="flex flex-1 overflow-hidden pb-16 md:pb-0 relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="flex flex-1 overflow-hidden pb-16 md:pb-0 relative bg-gradient-to-br from-slate-50 via-violet-50/30 to-purple-50/20">
           
           {/* MIDDLE PANEL - Canvas Preview with iPhone-style frame */}
           <div 
@@ -919,7 +864,7 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
               </button>
               <button
                 onClick={() => { setSidebarTab('ai'); setSelectedBlockId(null); }}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 relative ${
                   sidebarTab === 'ai'
                     ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/30 scale-105'
                     : 'text-slate-600 hover:bg-white/60 backdrop-blur-sm'
@@ -927,6 +872,9 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
               >
                 <Sparkles className="w-4 h-4" />
                 <span className="hidden sm:inline">AI</span>
+                <span className="absolute -top-1.5 -right-1 px-1 py-0.5 text-[8px] font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full leading-none shadow-sm">
+                  Soon
+                </span>
               </button>
             </div>
           </div>
@@ -941,15 +889,33 @@ export default function EditorLayout({ micrositeId }: EditorLayoutProps) {
                 />
               </div>
             ) : sidebarTab === 'ai' ? (
-              <div className="h-full">
-                <AIAssistantPanel 
-                  micrositeId={micrositeId}
-                  onApplyRecommendation={() => {
-                    console.log('AI recommendation applied - reloading microsite');
-                    // Reload microsite data to reflect AI changes
-                    loadMicrosite();
-                  }}
-                />
+              <div className="h-full flex items-center justify-center p-6">
+                <div className="text-center space-y-4 max-w-xs">
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800">AI Assistant</h3>
+                    <ComingSoonBadge />
+                  </div>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    AI-powered content suggestions, smart layouts, and automatic optimization are coming in the next release.
+                  </p>
+                  <div className="space-y-2 text-left">
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                      Smart content generation
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                      Auto layout optimization
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                      Performance recommendations
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="p-4">{/* Design Tab Content */}

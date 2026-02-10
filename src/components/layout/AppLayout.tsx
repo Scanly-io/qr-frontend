@@ -8,13 +8,17 @@ import {
   Menu,
   X,
   Plus,
-  User,
   Bell,
-  Search
+  Search,
+  BarChart3,
+  UserCircle,
+  Users,
+  CreditCard,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui';
+import { ComingSoonBadge, ComingSoonTooltip } from '@/components/ui/ComingSoonBadge';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -33,29 +37,47 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
       name: 'Dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
-      current: location.pathname === '/dashboard'
+      current: location.pathname === '/dashboard',
+      comingSoon: false,
     },
     {
-      name: 'QR Codes',
-      href: '/qr-codes',
-      icon: QrCode,
-      current: location.pathname.startsWith('/qr-codes')
+      name: 'Analytics',
+      href: '/analytics',
+      icon: BarChart3,
+      current: location.pathname === '/analytics',
+      comingSoon: false,
+    },
+    {
+      name: 'Team',
+      href: '#',
+      icon: Users,
+      current: false,
+      comingSoon: true,
+    },
+    {
+      name: 'Billing',
+      href: '#',
+      icon: CreditCard,
+      current: false,
+      comingSoon: true,
     },
     {
       name: 'Settings',
       href: '/settings',
       icon: Settings,
-      current: location.pathname === '/settings'
+      current: location.pathname === '/settings',
+      comingSoon: true,
     },
   ];
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    // Hard redirect to clear any cached state
+    window.location.href = '/login';
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       {/* Top Header Bar */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-slate-800 dark:bg-slate-950/95">
         <div className="flex h-16 items-center px-4 gap-4">
@@ -79,21 +101,24 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
                 <QrCode className="w-5 h-5 text-white" />
               </div>
               <span className="hidden sm:inline text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                QR Microsite
+                Scanly
               </span>
             </Link>
           </div>
 
           {/* Search Bar - Center */}
           <div className="hidden md:flex flex-1 max-w-xl mx-4">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search microsites..."
-                className="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100"
-              />
-            </div>
+            <ComingSoonTooltip feature="Search" className="w-full">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search microsites..."
+                  readOnly
+                  className="w-full h-10 pl-10 pr-4 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none cursor-pointer dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 opacity-60"
+                />
+              </div>
+            </ComingSoonTooltip>
           </div>
 
           {/* Right Actions */}
@@ -119,13 +144,14 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
             </button>
 
             {/* Notifications */}
-            <button
-              className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <ComingSoonTooltip feature="Notifications">
+              <button
+                className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+              </button>
+            </ComingSoonTooltip>
 
             {/* User Menu */}
             <div className="relative">
@@ -134,7 +160,7 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
                 className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
-                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                 </div>
               </button>
 
@@ -148,22 +174,22 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
                   <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900 z-50">
                     <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800">
                       <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                        {user?.email}
+                        {user?.name || user?.email}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        Free Plan
+                        {user?.name ? user.email : 'Free Plan'}
                       </p>
                     </div>
                     <div className="py-2">
                       <button
                         onClick={() => {
-                          navigate('/settings');
+                          navigate('/account');
                           setShowUserMenu(false);
                         }}
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
                       >
-                        <User className="h-4 w-4" />
-                        Profile Settings
+                        <UserCircle className="h-4 w-4" />
+                        Account
                       </button>
                       <button
                         onClick={() => {
@@ -173,7 +199,7 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
                       >
                         <Settings className="h-4 w-4" />
-                        Account Settings
+                        Settings
                       </button>
                     </div>
                     <div className="border-t border-slate-200 dark:border-slate-800 py-2">
@@ -201,6 +227,19 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
               <nav className="flex-1 space-y-1 p-4">
                 {navigationItems.map((item) => {
                   const Icon = item.icon;
+                  if (item.comingSoon) {
+                    return (
+                      <ComingSoonTooltip key={item.name} feature={item.name}>
+                        <div
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 dark:text-slate-500 cursor-pointer"
+                        >
+                          <Icon className="h-5 w-5 flex-shrink-0" />
+                          {item.name}
+                          <ComingSoonBadge />
+                        </div>
+                      </ComingSoonTooltip>
+                    );
+                  }
                   return (
                     <Link
                       key={item.name}
@@ -220,17 +259,19 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
 
               {/* Sidebar Footer */}
               <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-                <div className="p-3 rounded-lg bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-800">
-                  <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                    Upgrade to Pro
-                  </h4>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
-                    Unlock unlimited microsites and analytics
-                  </p>
-                  <Button variant="default" size="sm" className="w-full">
-                    Upgrade Now
-                  </Button>
-                </div>
+                <ComingSoonTooltip feature="Pro Plan">
+                  <div className="p-3 rounded-lg bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200 dark:border-violet-800">
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                      Upgrade to Pro
+                    </h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
+                      Unlock unlimited microsites and analytics
+                    </p>
+                    <Button variant="default" size="sm" className="w-full pointer-events-none">
+                      Upgrade Now
+                    </Button>
+                  </div>
+                </ComingSoonTooltip>
               </div>
             </aside>
 
@@ -254,6 +295,19 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
                   <nav className="flex-1 space-y-1 p-4">
                     {navigationItems.map((item) => {
                       const Icon = item.icon;
+                      if (item.comingSoon) {
+                        return (
+                          <ComingSoonTooltip key={item.name} feature={item.name}>
+                            <div
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 dark:text-slate-500 cursor-pointer"
+                            >
+                              <Icon className="h-5 w-5 flex-shrink-0" />
+                              {item.name}
+                              <ComingSoonBadge />
+                            </div>
+                          </ComingSoonTooltip>
+                        );
+                      }
                       return (
                         <Link
                           key={item.name}

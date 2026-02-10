@@ -13,7 +13,7 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Download, Copy, Check, Loader2, QrCode, ExternalLink, Palette, Sliders } from 'lucide-react';
-import { qrApi } from '@/lib/api';
+import { micrositeApi } from '@/lib/api';
 
 interface QRGenerationModalProps {
   isOpen: boolean;
@@ -90,44 +90,27 @@ export default function QRGenerationModal({
     setError('');
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost';
-      const targetUrl = `${baseUrl}/public/${micrositeId}`;
-
       console.log('🔵 Generating QR code...', {
         micrositeId,
-        targetUrl,
         micrositeName,
         existingQrId
       });
 
-      // Don't send qrId - let backend generate unique ID
-      const result = await qrApi.generate({
-        targetUrl,
-        // qrId: micrositeId, ❌ Don't use micrositeId - causes duplicates
-        metadata: {
-          name: micrositeName,
-          micrositeId
-        }
-      });
+      // Call microsite service to generate QR (uses pure JS qrcode library, no canvas needed)
+      const result = await micrositeApi.generateQr(micrositeId);
 
       console.log('✅ QR code generated:', result);
 
       setQrId(result.qrId);
-      setQrUrl(targetUrl);
+      setQrUrl(result.publicUrl);
 
       // Notify parent component
       if (onQRGenerated) {
-        onQRGenerated(result.qrId, targetUrl);
+        onQRGenerated(result.qrId, result.publicUrl);
       }
     } catch (err) {
       console.error('❌ Failed to generate QR:', err);
-      
-      // Better error handling for 409 Conflict
-      if (err instanceof Error && err.message.includes('409')) {
-        setError('QR code already exists for this microsite. Please refresh the page.');
-      } else {
-        setError(err instanceof Error ? err.message : 'Failed to generate QR code');
-      }
+      setError(err instanceof Error ? err.message : 'Failed to generate QR code');
     } finally {
       setIsGenerating(false);
     }

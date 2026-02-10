@@ -6,8 +6,6 @@ import { useState } from 'react';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { 
   spacing, 
-  typography, 
-  shadows, 
   borders, 
   animations, 
   getCardStyles, 

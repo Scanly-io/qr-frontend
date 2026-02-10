@@ -1,7 +1,7 @@
 import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Plus, Minus, HelpCircle, MessageCircle, Sparkles } from 'lucide-react';
+import { ChevronDown, Plus, Minus, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { 

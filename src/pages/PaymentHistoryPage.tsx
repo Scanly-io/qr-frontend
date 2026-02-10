@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { DollarSign, Download, TrendingUp, Calendar, Filter, Search } from 'lucide-react';
 
 interface Payment {
@@ -7,6 +7,7 @@ interface Payment {
   currency: string;
   status: string;
   customerEmail: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   items: any[];
   createdAt: string;
   completedAt: string | null;
@@ -153,7 +154,7 @@ export default function PaymentHistoryPage() {
               <Filter className="w-5 h-5 text-gray-400" />
               <select
                 value={filter}
-                onChange={(e) => setFilter(e.target.value as any)}
+                onChange={(e) => setFilter(e.target.value as 'all' | 'completed' | 'pending' | 'failed')}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
               >
                 <option value="all">All Payments</option>

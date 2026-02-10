@@ -3,23 +3,20 @@ import type { PageTheme } from '@/types/theme';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Clock, Percent, Tag, Flame, Zap, Gift, Copy, Check,
-  ArrowRight, Star, Sparkles, AlertCircle, Timer, Ticket, ShoppingCart
+  ArrowRight, AlertCircle, Timer, Ticket, ShoppingCart
 } from 'lucide-react';
 import { useState, useEffect, memo } from 'react';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { usePayment } from '@/contexts/PaymentContext';
+import { trackCTA } from '@/utils/trackCTA';
 import { 
   spacing, 
   typography, 
   shadows, 
   borders, 
   animations, 
-  colors,
   getCardStyles,
-  getTextColor,
-  getPrimaryShadow,
-  staggerContainer,
-  staggerItem
+  getPrimaryShadow
 } from '../../utils/designSystem';
 
 interface DealsBlockProps {
@@ -58,7 +55,22 @@ function isDarkBackground(theme?: PageTheme): boolean {
 
 // Countdown hook
 function useCountdown(targetDate: string | undefined) {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
+  const [timeLeft, setTimeLeft] = useState(() => {
+    if (!targetDate) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: false };
+    
+    const difference = new Date(targetDate).getTime() - Date.now();
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+    }
+    
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+      expired: false,
+    };
+  });
   
   useEffect(() => {
     if (!targetDate) return;
@@ -78,7 +90,6 @@ function useCountdown(targetDate: string | undefined) {
       };
     };
     
-    setTimeLeft(calculateTimeLeft());
     const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
     return () => clearInterval(timer);
   }, [targetDate]);
@@ -172,6 +183,7 @@ export default function DealsBlock({ block, theme }: DealsBlockProps) {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
       setTimeout(() => setCopiedCode(null), 2000);
+      trackCTA(block.id, `Copy Code: ${code}`, '', 'deals');
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -185,6 +197,7 @@ export default function DealsBlock({ block, theme }: DealsBlockProps) {
       ? deal.originalPrice - deal.discountedPrice 
       : 0;
     
+    trackCTA(block.id, deal.title, `deal-${block.id}-${index}`, 'deals');
     addToCart({
       id: `deal-${block.id}-${index}`,
       type: 'product',

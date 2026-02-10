@@ -249,7 +249,7 @@ export const RESTAURANT_TEMPLATES: IndustryTemplate[] = [
     name: 'Casual Café',
     description: 'Friendly neighborhood café with cozy vibes',
     category: 'restaurant',
-    gradient: 'from-amber-500 via-orange-500 to-red-500',
+    gradient: 'from-yellow-500 via-amber-500 to-orange-500',
     tags: ['cafe', 'casual', 'coffee', 'brunch'],
     blocks: [
       {
@@ -479,7 +479,7 @@ export const ARTIST_TEMPLATES: IndustryTemplate[] = [
           style: 'cards',
           title: 'Merch Store',
           deals: [
-            { title: 'Tour T-Shirt', description: 'Limited edition 2024 tour merch', originalPrice: 35, discountedPrice: 28, discountPercent: 20, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300' },
+            { title: 'Tour T-Shirt', description: 'Limited edition 2026 tour merch', originalPrice: 35, discountedPrice: 28, discountPercent: 20, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300' },
             { title: 'Vinyl Record', description: 'Signed limited pressing', originalPrice: 45, discountedPrice: 45 },
           ],
         },
@@ -560,7 +560,7 @@ export const ARTIST_TEMPLATES: IndustryTemplate[] = [
     name: 'Visual Artist',
     description: 'Portfolio showcase for painters, illustrators, photographers',
     category: 'artist',
-    gradient: 'from-violet-500 via-purple-500 to-fuchsia-500',
+    gradient: 'from-pink-500 via-rose-400 to-amber-400',
     tags: ['artist', 'visual', 'gallery', 'painter', 'photographer'],
     blocks: [
       {
@@ -628,7 +628,7 @@ export const ARTIST_TEMPLATES: IndustryTemplate[] = [
         type: 'testimonial',
         content: {
           quotes: [
-            { quote: 'Mia Chen\'s work transcends traditional boundaries, capturing raw emotion through bold color choices and fearless composition.', author: 'Art Forum Magazine', role: 'Featured Review, 2024' },
+            { quote: 'Mia Chen\'s work transcends traditional boundaries, capturing raw emotion through bold color choices and fearless composition.', author: 'Art Forum Magazine', role: 'Featured Review, 2026' },
             { quote: 'One of the most exciting voices in contemporary abstract art. Her pieces command attention and provoke deep reflection.', author: 'Sarah Johnson', role: 'Chief Curator, MoMA' },
           ],
           style: 'card',
@@ -1045,7 +1045,7 @@ export const REAL_ESTATE_TEMPLATES: IndustryTemplate[] = [
         id: nanoid(),
         type: 'footer',
         content: {
-          text: '© 2025 Sarah Mitchell Real Estate | DRE# 01234567 | Serving Beverly Hills, Malibu, Bel Air & Beyond',
+          text: '© 2026 Sarah Mitchell Real Estate | DRE# 01234567 | Serving Beverly Hills, Malibu, Bel Air & Beyond',
           showPoweredBy: false,
         },
         style: {},
@@ -1561,7 +1561,7 @@ export const REAL_ESTATE_TEMPLATES: IndustryTemplate[] = [
         content: {
           title: 'Property Highlights',
           features: [
-            { title: 'Renovated 2024', description: 'Completely updated', icon: 'sparkles' },
+            { title: 'Renovated 2025', description: 'Completely updated', icon: 'sparkles' },
             { title: 'Pool & Spa', description: 'Heated year-round', icon: 'waves' },
             { title: 'Chef\'s Kitchen', description: 'Viking appliances', icon: 'utensils' },
             { title: 'Smart Home', description: 'Full automation', icon: 'zap' },
@@ -3164,7 +3164,7 @@ export const PROFESSIONAL_TEMPLATES: IndustryTemplate[] = [
         id: nanoid(),
         type: 'footer',
         content: {
-          text: '© 2025 Blake Wealth Management | Jonathan Blake, CFP®, ChFC®\nSecurities offered through ABC Securities, Member FINRA/SIPC\nAdvisory services through Blake Wealth Management, a Registered Investment Advisor',
+          text: '© 2026 Blake Wealth Management | Jonathan Blake, CFP®, ChFC®\nSecurities offered through ABC Securities, Member FINRA/SIPC\nAdvisory services through Blake Wealth Management, a Registered Investment Advisor',
           showPoweredBy: false,
         },
         style: {},
@@ -3474,7 +3474,7 @@ export const PROFESSIONAL_TEMPLATES: IndustryTemplate[] = [
         id: nanoid(),
         type: 'footer',
         content: {
-          text: '© 2025 Alex Rivera Design Studio | Available for select projects worldwide',
+          text: '© 2026 Alex Rivera Design Studio | Available for select projects worldwide',
           showPoweredBy: false,
         },
         style: {},

@@ -9,12 +9,7 @@ import {
   shadows, 
   borders, 
   animations, 
-  colors,
-  getCardStyles,
-  getTextColor,
-  getPrimaryShadow,
-  staggerContainer,
-  staggerItem
+  getCardStyles
 } from '../../utils/designSystem';
 
 interface StatsBlockProps {

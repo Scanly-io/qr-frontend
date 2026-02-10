@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://nginx:80}
+        VITE_FRONTEND_URL: ${VITE_FRONTEND_URL:-http://localhost:4173}
+    image: qr-frontend:local
+    container_name: qr_frontend_local
+    ports:
+      - "4173:80"
+    networks:
+      - qr_network
+    depends_on:
+      - nginx
+
+networks:
+  qr_network:
+    external: true

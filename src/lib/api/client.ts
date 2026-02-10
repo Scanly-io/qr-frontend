@@ -10,7 +10,7 @@
  */
 
 // API Gateway URL (nginx on port 80)
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
@@ -23,8 +23,6 @@ async function refreshAccessToken(): Promise<string> {
   if (!refreshToken) {
     throw new Error('No refresh token available');
   }
-
-  console.log('🔄 Refreshing access token...');
 
   const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
     method: 'POST',
@@ -43,7 +41,6 @@ async function refreshAccessToken(): Promise<string> {
 
   // Update localStorage
   localStorage.setItem('accessToken', newAccessToken);
-  console.log('✅ Token refreshed successfully');
 
   return newAccessToken;
 }
@@ -77,28 +74,14 @@ export async function apiCall<T = unknown>(
 
   try {
     const fullUrl = `${API_BASE_URL}${endpoint}`;
-    console.log('🌐 API Call:', {
-      url: fullUrl,
-      method: options.method || 'GET',
-      hasAuth: !!accessToken,
-      isRetry,
-    });
 
     const response = await fetch(fullUrl, {
       ...options,
       headers,
     });
 
-    console.log('📥 API Response:', {
-      url: fullUrl,
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
-    });
-
     // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401 && !isRetry) {
-      console.log('🔐 Got 401, attempting token refresh...');
       
       try {
         // Prevent multiple simultaneous refresh requests
@@ -113,13 +96,16 @@ export async function apiCall<T = unknown>(
         }
 
         // Retry the original request with new token
-        console.log('🔁 Retrying request with new token...');
         return await apiCall<T>(endpoint, options, true);
-      } catch (refreshError) {
-        console.error('❌ Token refresh failed:', refreshError);
-        // Clear auth and redirect to login
+      } catch {
+        // Refresh failed - clear ALL auth state and redirect
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('auth-storage');
+        isRefreshing = false;
+        refreshPromise = null;
+        
+        // Redirect to login
         window.location.href = '/login';
         throw new Error('Session expired. Please login again.');
       }
@@ -127,20 +113,16 @@ export async function apiCall<T = unknown>(
 
     // Handle non-JSON responses (like 204 No Content)
     if (response.status === 204) {
-      console.log('✅ No content response (204)');
       return {} as T;
     }
 
     const data = await response.json();
-    console.log('📦 Response data:', data);
 
     // Handle error responses
     if (!response.ok) {
-      console.error('❌ API Error:', data);
       throw new Error(data.error || data.message || `API Error: ${response.status}`);
     }
 
-    console.log('✅ API call successful');
     return data as T;
   } catch (error) {
     if (error instanceof Error) {

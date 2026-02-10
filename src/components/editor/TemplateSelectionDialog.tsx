@@ -80,7 +80,7 @@ export function TemplateSelectionDialog({ open, onClose, onSelect }: TemplateSel
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-600" />
+            <Sparkles className="w-5 h-5 text-violet-600" />
             Choose a Template
           </DialogTitle>
         </DialogHeader>
@@ -90,7 +90,7 @@ export function TemplateSelectionDialog({ open, onClose, onSelect }: TemplateSel
           <button
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'sales-rooms'
-                ? 'border-b-2 border-blue-600 text-blue-600'
+                ? 'border-b-2 border-violet-600 text-violet-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
             onClick={() => setActiveTab('sales-rooms')}
@@ -101,7 +101,7 @@ export function TemplateSelectionDialog({ open, onClose, onSelect }: TemplateSel
           <button
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === 'ecommerce'
-                ? 'border-b-2 border-blue-600 text-blue-600'
+                ? 'border-b-2 border-violet-600 text-violet-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
             onClick={() => setActiveTab('ecommerce')}
@@ -113,7 +113,7 @@ export function TemplateSelectionDialog({ open, onClose, onSelect }: TemplateSel
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
           </div>
         ) : (
           <div className="space-y-4 py-4">
@@ -122,25 +122,25 @@ export function TemplateSelectionDialog({ open, onClose, onSelect }: TemplateSel
                 {salesRoomTemplates.map((template) => (
                   <div
                     key={template.id}
-                    className="border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                    className="border rounded-xl p-6 hover:shadow-lg hover:border-violet-200 transition-all cursor-pointer group"
                     onClick={() => handleSelectSalesRoom(template)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-2">{template.name}</h3>
+                        <h3 className="text-lg font-semibold mb-2 group-hover:text-violet-700 transition-colors">{template.name}</h3>
                         <p className="text-gray-600 mb-4">{template.description}</p>
                         <div className="flex flex-wrap gap-2">
                           {template.variables.map((variable) => (
                             <span
                               key={variable}
-                              className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-sm"
+                              className="px-2 py-1 bg-violet-50 text-violet-700 rounded-lg text-sm"
                             >
                               {variable}
                             </span>
                           ))}
                         </div>
                       </div>
-                      <Button size="sm">Use Template</Button>
+                      <Button size="sm" className="bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200">Use Template</Button>
                     </div>
                   </div>
                 ))}
@@ -152,23 +152,23 @@ export function TemplateSelectionDialog({ open, onClose, onSelect }: TemplateSel
                 {ecommerceTemplates.map((template) => (
                   <div
                     key={template.id}
-                    className="border rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                    className="border rounded-xl p-6 hover:shadow-lg hover:border-violet-200 transition-all cursor-pointer group"
                     onClick={() => handleSelectEcommerce(template)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold mb-2">{template.name}</h3>
+                        <h3 className="text-lg font-semibold mb-2 group-hover:text-violet-700 transition-colors">{template.name}</h3>
                         <p className="text-gray-600 mb-4">{template.description}</p>
                         <div className="flex items-center gap-2">
                           <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-medium">
                             AEO Optimized
                           </span>
-                          <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm capitalize">
+                          <span className="px-3 py-1 bg-violet-50 text-violet-700 rounded-full text-sm capitalize">
                             {template.nicheCategory.replace(/-/g, ' ')}
                           </span>
                         </div>
                       </div>
-                      <Button size="sm">Use Template</Button>
+                      <Button size="sm" className="bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200">Use Template</Button>
                     </div>
                   </div>
                 ))}

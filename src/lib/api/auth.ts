@@ -47,4 +47,36 @@ export const authApi = {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
   },
+
+  /**
+   * Update user profile
+   * PATCH /auth/profile
+   */
+  updateProfile: async (data: { name?: string }): Promise<User> => {
+    return api.patch<User>('/auth/profile', data);
+  },
+
+  /**
+   * Change password (while logged in)
+   * POST /auth/change-password
+   */
+  changePassword: async (currentPassword: string, newPassword: string): Promise<{ message: string }> => {
+    return api.post<{ message: string }>('/auth/change-password', { currentPassword, newPassword });
+  },
+
+  /**
+   * Request password reset email
+   * POST /auth/forgot-password
+   */
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    return api.post<{ message: string }>('/auth/forgot-password', { email });
+  },
+
+  /**
+   * Reset password with token
+   * POST /auth/reset-password
+   */
+  resetPassword: async (token: string, password: string): Promise<{ message: string }> => {
+    return api.post<{ message: string }>('/auth/reset-password', { token, password });
+  },
 };

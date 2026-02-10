@@ -25,12 +25,11 @@ import type { PageTheme } from '@/types/theme';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
 import { 
-  spacing, 
   borders, 
   animations, 
-  getCardStyles, 
-  getPrimaryShadow 
+  getCardStyles
 } from '@/utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface EventsBlockProps {
   block: Block;
@@ -319,7 +318,7 @@ export default function EventsBlock({ block, theme }: EventsBlockProps) {
                 className="flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 rounded-xl font-bold text-sm hover:bg-white/90 transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); trackCTA(block.id, event.ticketPrice ? `Get Tickets • ${event.ticketPrice}` : 'Learn More', event.link!, 'events'); }}
               >
                 {event.ticketPrice ? (
                   <>
@@ -524,6 +523,7 @@ export default function EventsBlock({ block, theme }: EventsBlockProps) {
                 className="inline-flex items-center gap-2 text-sm font-bold"
                 style={{ color: primaryColor }}
                 whileHover={{ x: 5 }}
+                onClick={() => trackCTA(block.id, event.ticketPrice ? `Get Tickets • ${event.ticketPrice}` : 'Learn More', event.link!, 'events')}
               >
                 {event.ticketPrice ? `Get Tickets • ${event.ticketPrice}` : 'Learn More'}
                 <ExternalLink className="w-4 h-4" />

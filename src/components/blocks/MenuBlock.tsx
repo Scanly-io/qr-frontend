@@ -3,9 +3,8 @@ import type { PageTheme } from '@/types/theme';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Leaf, Flame, Star, Clock, 
-  Sparkles, Heart, Plus, Minus, ShoppingCart,
-  UtensilsCrossed, Coffee, Wine, Salad, Cake, Pizza,
-  X, Trash2, Lock, Package, CreditCard, Loader2
+  Sparkles, Heart, Plus, Minus,
+  UtensilsCrossed, Coffee, Wine, Salad, Cake, Pizza
 } from 'lucide-react';
 import { useState } from 'react';
 import { 
@@ -14,16 +13,12 @@ import {
   shadows, 
   borders, 
   animations, 
-  colors,
   getCardStyles,
-  getTextColor,
   getPrimaryShadow,
-  staggerContainer,
-  staggerItem
 } from '../../utils/designSystem';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { usePayment } from '@/contexts/PaymentContext';
-import { formatCurrency } from '@/lib/payment-utils';
+import { trackCTA } from '@/utils/trackCTA';
 
 interface MenuBlockProps {
   block: Block;
@@ -136,9 +131,6 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
     addToCart: addToPaymentCart, 
     cart: paymentCart, 
     updateQuantity, 
-    removeFromCart,
-    cartCount,
-    cartTotal 
   } = usePayment();
 
   // Configuration
@@ -194,6 +186,7 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
 
   // Cart functions using PaymentContext
   const handleAddToCart = (item: MenuItem, categoryIndex: number, itemIndex: number) => {
+    trackCTA(block.id, item.name, `menu-item-${categoryIndex}-${itemIndex}`, 'menu');
     addToPaymentCart({
       id: `menu-${block.id}-${categoryIndex}-${itemIndex}`,
       type: 'product',

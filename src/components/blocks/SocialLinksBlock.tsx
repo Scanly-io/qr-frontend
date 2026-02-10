@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Block } from '@/types';
 import { cn } from '@/lib/utils';
 import { shadows, animations } from '@/utils/designSystem';
+import { trackCTA } from '@/utils/trackCTA';
 
 // Import modern brand icons
 import {
@@ -653,6 +654,7 @@ export default function SocialLinksBlock({ block, isEditing = false, onUpdate, t
                 href={finalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackCTA(block.id, link.customLabel || platform.label, finalUrl, 'social-links')}
                 className={cn(
                   "flex items-center gap-2",
                   layout === 'list' ? 'flex-row' : 'flex-col'
