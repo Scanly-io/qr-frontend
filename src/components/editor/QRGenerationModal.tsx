@@ -77,8 +77,10 @@ export default function QRGenerationModal({
   // Set URL when modal opens with existing QR
   useEffect(() => {
     if (existingQrId) {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost';
-      const targetUrl = `${baseUrl}/public/${micrositeId}`;
+      // Use the frontend URL (not the API URL) so the React-rendered
+      // PublicMicrositePage handles the display — identical to preview.
+      const baseUrl = window.location.origin;
+      const targetUrl = `${baseUrl}/public/${existingQrId}`;
       setQrId(existingQrId);
       setQrUrl(targetUrl);
     }
@@ -151,10 +153,27 @@ export default function QRGenerationModal({
     img.src = url;
   };
 
+  // Clipboard fallback for non-HTTPS contexts
+  const copyToClipboard = async (text: string): Promise<void> => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      // Fallback: use a temporary textarea
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+  };
+
   // Copy URL to clipboard
   const handleCopyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(qrUrl);
+      await copyToClipboard(qrUrl);
       setCopiedUrl(true);
       setTimeout(() => setCopiedUrl(false), 2000);
     } catch (err) {
@@ -165,7 +184,7 @@ export default function QRGenerationModal({
   // Copy QR ID to clipboard
   const handleCopyQrId = async () => {
     try {
-      await navigator.clipboard.writeText(qrId);
+      await copyToClipboard(qrId);
       setCopiedQrId(true);
       setTimeout(() => setCopiedQrId(false), 2000);
     } catch (err) {

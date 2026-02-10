@@ -111,7 +111,7 @@ export function PaymentProvider({ children }: PaymentProviderProps) {
         setStripe(stripeInstance);
       });
     } else {
-      console.error('❌ Missing VITE_STRIPE_PUBLISHABLE_KEY in environment');
+      console.warn('⚠️ VITE_STRIPE_PUBLISHABLE_KEY not set — Stripe payments disabled');
     }
   }, []);
 

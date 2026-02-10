@@ -25,24 +25,27 @@ export const analyticsApi = {
    * GET /analytics/:qrId/summary
    * Quick overview of scan counts
    */
-  getSummary: async (qrId: string): Promise<AnalyticsSummary> => {
-    return api.get<AnalyticsSummary>(`/analytics/${qrId}/summary`);
+  getSummary: async (qrId: string, micrositeId?: string): Promise<AnalyticsSummary> => {
+    const params = micrositeId ? `?micrositeId=${micrositeId}` : '';
+    return api.get<AnalyticsSummary>(`/analytics/${qrId}/summary${params}`);
   },
 
   /**
    * GET /analytics/:qrId/timeseries
    * Daily scan counts for charting
    */
-  getTimeseries: async (qrId: string): Promise<TimeSeriesResponse> => {
-    return api.get<TimeSeriesResponse>(`/analytics/${qrId}/timeseries`);
+  getTimeseries: async (qrId: string, micrositeId?: string): Promise<TimeSeriesResponse> => {
+    const params = micrositeId ? `?micrositeId=${micrositeId}` : '';
+    return api.get<TimeSeriesResponse>(`/analytics/${qrId}/timeseries${params}`);
   },
 
   /**
    * GET /analytics/:qrId/patterns
    * Scan patterns by hour and day of week
    */
-  getPatterns: async (qrId: string): Promise<PatternAnalysis> => {
-    return api.get<PatternAnalysis>(`/analytics/${qrId}/patterns`);
+  getPatterns: async (qrId: string, micrositeId?: string): Promise<PatternAnalysis> => {
+    const params = micrositeId ? `?micrositeId=${micrositeId}` : '';
+    return api.get<PatternAnalysis>(`/analytics/${qrId}/patterns${params}`);
   },
 
   /**
@@ -52,11 +55,13 @@ export const analyticsApi = {
   getDevices: async (
     qrId: string,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
+    micrositeId?: string,
   ): Promise<DeviceAnalytics> => {
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
+    if (micrositeId) params.append('micrositeId', micrositeId);
     
     const url = `/analytics/${qrId}/devices${params.toString() ? `?${params.toString()}` : ''}`;
     return api.get<DeviceAnalytics>(url);
@@ -86,10 +91,11 @@ export const analyticsApi = {
    * GET /analytics/:qrId/funnel
    * Conversion funnel metrics
    */
-  getFunnel: async (qrId: string, startDate?: string, endDate?: string): Promise<FunnelAnalytics> => {
+  getFunnel: async (qrId: string, startDate?: string, endDate?: string, micrositeId?: string): Promise<FunnelAnalytics> => {
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
+    if (micrositeId) params.append('micrositeId', micrositeId);
     
     const url = `/analytics/${qrId}/funnel${params.toString() ? `?${params.toString()}` : ''}`;
     return api.get<FunnelAnalytics>(url);
@@ -99,10 +105,11 @@ export const analyticsApi = {
    * GET /analytics/:qrId/geography
    * Geographic distribution by country and city
    */
-  getGeography: async (qrId: string, startDate?: string, endDate?: string): Promise<GeographyAnalytics> => {
+  getGeography: async (qrId: string, startDate?: string, endDate?: string, micrositeId?: string): Promise<GeographyAnalytics> => {
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
+    if (micrositeId) params.append('micrositeId', micrositeId);
     
     const url = `/analytics/${qrId}/geography${params.toString() ? `?${params.toString()}` : ''}`;
     return api.get<GeographyAnalytics>(url);
@@ -112,10 +119,11 @@ export const analyticsApi = {
    * GET /analytics/:qrId/unique-visitors
    * Unique visitor analytics
    */
-  getUniqueVisitors: async (qrId: string, startDate?: string, endDate?: string): Promise<UniqueVisitorAnalytics> => {
+  getUniqueVisitors: async (qrId: string, startDate?: string, endDate?: string, micrositeId?: string): Promise<UniqueVisitorAnalytics> => {
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
+    if (micrositeId) params.append('micrositeId', micrositeId);
     
     const url = `/analytics/${qrId}/unique-visitors${params.toString() ? `?${params.toString()}` : ''}`;
     return api.get<UniqueVisitorAnalytics>(url);
@@ -125,10 +133,11 @@ export const analyticsApi = {
    * GET /analytics/:qrId/cta-buttons
    * CTA button click analytics
    */
-  getCTAButtons: async (qrId: string, startDate?: string, endDate?: string): Promise<CTAButtonAnalytics> => {
+  getCTAButtons: async (qrId: string, startDate?: string, endDate?: string, micrositeId?: string): Promise<CTAButtonAnalytics> => {
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
+    if (micrositeId) params.append('micrositeId', micrositeId);
     
     const url = `/analytics/${qrId}/cta-buttons${params.toString() ? `?${params.toString()}` : ''}`;
     return api.get<CTAButtonAnalytics>(url);
@@ -138,10 +147,11 @@ export const analyticsApi = {
    * GET /analytics/:qrId/referrers
    * Traffic source analytics
    */
-  getReferrers: async (qrId: string, startDate?: string, endDate?: string): Promise<ReferrerAnalytics> => {
+  getReferrers: async (qrId: string, startDate?: string, endDate?: string, micrositeId?: string): Promise<ReferrerAnalytics> => {
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
+    if (micrositeId) params.append('micrositeId', micrositeId);
     
     const url = `/analytics/${qrId}/referrers${params.toString() ? `?${params.toString()}` : ''}`;
     return api.get<ReferrerAnalytics>(url);
