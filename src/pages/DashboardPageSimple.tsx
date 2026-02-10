@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Plus, QrCode, Eye, Edit, Trash2, TrendingUp, Copy, ExternalLink, BarChart3 } from 'lucide-react';
 import { micrositeApi, analyticsApi } from '../lib/api';
-import { TemplateSelectionDialog } from '../components/editor/TemplateSelectionDialog';
 import { AppLayout } from '../components/layout/AppLayout';
 import { Tooltip } from '../components/ui/tooltip';
 
