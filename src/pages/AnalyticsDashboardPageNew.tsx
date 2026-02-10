@@ -147,19 +147,23 @@ export default function AnalyticsDashboardPage() {
   // Load analytics whenever selectedQrId changes
   useEffect(() => {
     if (!selectedQrId) return;
+    // Find the micrositeId (UUID) for the selected qrId to ensure analytics
+    // picks up events stored under both the slug and UUID identifiers
+    const selectedMicrosite = microsites.find(m => m.qrId === selectedQrId);
+    const micrositeId = selectedMicrosite?.id;
     const loadAnalytics = async () => {
       setLoading(true);
       try {
         const [summaryRes, timeseriesRes, geoRes, devicesRes, patternsRes, ctaRes, referrersRes, funnelRes] =
           await Promise.all([
-            analyticsApi.getSummary(selectedQrId),
-            analyticsApi.getTimeseries(selectedQrId),
-            analyticsApi.getGeography(selectedQrId),
-            analyticsApi.getDevices(selectedQrId),
-            analyticsApi.getPatterns(selectedQrId),
-            analyticsApi.getCTAButtons(selectedQrId),
-            analyticsApi.getReferrers(selectedQrId),
-            analyticsApi.getFunnel(selectedQrId)
+            analyticsApi.getSummary(selectedQrId, micrositeId),
+            analyticsApi.getTimeseries(selectedQrId, micrositeId),
+            analyticsApi.getGeography(selectedQrId, undefined, undefined, micrositeId),
+            analyticsApi.getDevices(selectedQrId, undefined, undefined, micrositeId),
+            analyticsApi.getPatterns(selectedQrId, micrositeId),
+            analyticsApi.getCTAButtons(selectedQrId, undefined, undefined, micrositeId),
+            analyticsApi.getReferrers(selectedQrId, undefined, undefined, micrositeId),
+            analyticsApi.getFunnel(selectedQrId, undefined, undefined, micrositeId)
           ]);
 
         setStats(summaryRes);
@@ -177,7 +181,7 @@ export default function AnalyticsDashboardPage() {
       }
     };
     loadAnalytics();
-  }, [selectedQrId]);
+  }, [selectedQrId, microsites]);
 
   // Filter timeseries data based on selected date range (must be before early return)
   const filteredTimeseries = useMemo(() => {
