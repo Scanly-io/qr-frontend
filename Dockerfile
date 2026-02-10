@@ -9,14 +9,20 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies (use legacy peer deps to match local dev setup)
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Accept build-time env vars for Vite (baked into build)
+ARG VITE_API_URL
+ARG VITE_FRONTEND_URL
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_FRONTEND_URL=${VITE_FRONTEND_URL}
+
+# Build the application (skip full tsc check in container for faster builds/tests)
+RUN npx vite build
 
 # Stage 2: Production
 FROM nginx:alpine

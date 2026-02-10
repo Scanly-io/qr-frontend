@@ -1,0 +1,28 @@
+version: "3.9"
+
+# ========================================
+# FRONTEND - Phase 1 Dokploy Deployment
+# ========================================
+# Standalone frontend service for Dokploy.
+# Traefik routes scanly.duckdns.org → this container.
+# API calls go to api-scanly.duckdns.org (backend).
+# ========================================
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://api-scanly.duckdns.org}
+        VITE_FRONTEND_URL: ${VITE_FRONTEND_URL:-http://scanly.duckdns.org}
+    image: qr-frontend-phase1:latest
+    container_name: qr_frontend_phase1
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
