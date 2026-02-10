@@ -18,8 +18,10 @@ COPY . .
 # Accept build-time env vars for Vite (baked into build)
 ARG VITE_API_URL
 ARG VITE_FRONTEND_URL
+ARG VITE_STRIPE_PUBLISHABLE_KEY
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_FRONTEND_URL=${VITE_FRONTEND_URL}
+ENV VITE_STRIPE_PUBLISHABLE_KEY=${VITE_STRIPE_PUBLISHABLE_KEY}
 
 # Build the application (skip full tsc check in container for faster builds/tests)
 RUN npx vite build

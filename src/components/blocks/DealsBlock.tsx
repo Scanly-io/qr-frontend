@@ -180,7 +180,18 @@ export default function DealsBlock({ block, theme }: DealsBlockProps) {
 
   const copyCode = async (code: string) => {
     try {
-      await navigator.clipboard.writeText(code);
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(code);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = code;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
       setCopiedCode(code);
       setTimeout(() => setCopiedCode(null), 2000);
       trackCTA(block.id, `Copy Code: ${code}`, '', 'deals');
