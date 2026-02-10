@@ -77,8 +77,10 @@ export default function QRGenerationModal({
   // Set URL when modal opens with existing QR
   useEffect(() => {
     if (existingQrId) {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost';
-      const targetUrl = `${baseUrl}/public/${micrositeId}`;
+      // Use the frontend URL (not the API URL) so the React-rendered
+      // PublicMicrositePage handles the display — identical to preview.
+      const baseUrl = window.location.origin;
+      const targetUrl = `${baseUrl}/public/${existingQrId}`;
       setQrId(existingQrId);
       setQrUrl(targetUrl);
     }
