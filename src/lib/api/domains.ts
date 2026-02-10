@@ -6,7 +6,7 @@
  * 
  * Features:
  * - Custom domain management (scan.yourbrand.com)
- * - Free subdomain claiming (username.scanly.io)
+ * - Free subdomain claiming (username.scanwyse.io)
  * - DNS verification
  * - SSL certificate management
  * - Path-based routing
@@ -57,8 +57,8 @@ export interface DomainRoute {
 export interface Subdomain {
   id: string;
   userId: string;
-  subdomain: string; // e.g., "mystore" for mystore.scanly.io
-  fullDomain: string; // e.g., "mystore.scanly.io"
+  subdomain: string; // e.g., "mystore" for mystore.scanwyse.io
+  fullDomain: string; // e.g., "mystore.scanwyse.io"
   status: 'pending' | 'active' | 'suspended';
   publishedAt?: string;
   routes: SubdomainRoute[];

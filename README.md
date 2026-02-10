@@ -1,4 +1,4 @@
-# Scanly - QR-Powered Microsite Platform# QR Microsite Builder - Frontend# QR Microsite Builder - Frontend
+# ScanWyse - QR-Powered Microsite Platform# QR Microsite Builder - Frontend# QR Microsite Builder - Frontend
 
 
 
@@ -6,7 +6,7 @@
 
 
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://scanly.io)A modern, drag-and-drop microsite builder with QR code generation capabilities. Create beautiful, mobile-responsive landing pages with 30+ customizable content blocks.> A drag-and-drop website builder for creating mobile-first microsites accessible via QR codes.
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://scanwyse.io)A modern, drag-and-drop microsite builder with QR code generation capabilities. Create beautiful, mobile-responsive landing pages with 30+ customizable content blocks.> A drag-and-drop website builder for creating mobile-first microsites accessible via QR codes.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -20,15 +20,15 @@
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)![React](https://img.shields.io/badge/React-18-blue)
 
-## 🎯 What is Scanly?
+## 🎯 What is ScanWyse?
 
 ![Vite](https://img.shields.io/badge/Vite-5-purple)![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-Scanly is a modern, no-code microsite builder that turns QR codes into interactive, branded experiences. Whether you're a restaurant sharing your menu, an artist showcasing your portfolio, or a business collecting leads—Scanly gives you the power to create stunning mobile-first pages in minutes.
+ScanWyse is a modern, no-code microsite builder that turns QR codes into interactive, branded experiences. Whether you're a restaurant sharing your menu, an artist showcasing your portfolio, or a business collecting leads—ScanWyse gives you the power to create stunning mobile-first pages in minutes.
 
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-cyan)![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-blue)
 
-### Why Scanly?
+### Why ScanWyse?
 
 
 
@@ -122,7 +122,7 @@ Scanly is a modern, no-code microsite builder that turns QR codes into interacti
 
 
 
-1. **Sign Up** at [scanly.io](https://scanly.io)- **Maps Integration** - Embedded location maps- **ID Generation**: nanoid
+1. **Sign Up** at [scanwyse.io](https://scanwyse.io)- **Maps Integration** - Embedded location maps- **ID Generation**: nanoid
 
 2. **Choose a Template** or start blank
 
@@ -140,7 +140,7 @@ Scanly is a modern, no-code microsite builder that turns QR codes into interacti
 
 # Clone and install### 📊 Analytics & Insights### 🎨 Three-Panel Editor
 
-git clone https://github.com/Scanly-io/qr-frontend.git
+git clone https://github.com/ScanWyse-io/qr-frontend.git
 
 cd qr-frontend- **Real-time Analytics** - Track views, clicks, and conversions- **Left Panel**: Draggable block palette
 
@@ -262,7 +262,7 @@ src/
 
 ```
 
-- Backend API running (see [qr-backend](https://github.com/Scanly-io/qr-backend))│   │   ├── Canvas.tsx
+- Backend API running (see [qr-backend](https://github.com/ScanWyse-io/qr-backend))│   │   ├── Canvas.tsx
 
 ---
 
@@ -586,7 +586,7 @@ Centralized theming with:## 🤝 Contributing
 
 
 
-[View full roadmap →](https://github.com/Scanly-io/qr-frontend/projects/1)- **Live Preview**: See changes in real-time
+[View full roadmap →](https://github.com/ScanWyse-io/qr-frontend/projects/1)- **Live Preview**: See changes in real-time
 
 
 
@@ -634,15 +634,15 @@ const microsite = await micrositeApi.create({
 
 });
 
-- **Documentation**: [docs.scanly.io](https://docs.scanly.io)
+- **Documentation**: [docs.scanwyse.io](https://docs.scanwyse.io)
 
-- **Issues**: [GitHub Issues](https://github.com/Scanly-io/qr-frontend/issues)// Update microsite
+- **Issues**: [GitHub Issues](https://github.com/ScanWyse-io/qr-frontend/issues)// Update microsite
 
-- **Discussions**: [GitHub Discussions](https://github.com/Scanly-io/qr-frontend/discussions)await micrositeApi.update(id, { title: 'New Title' });
+- **Discussions**: [GitHub Discussions](https://github.com/ScanWyse-io/qr-frontend/discussions)await micrositeApi.update(id, { title: 'New Title' });
 
-- **Email**: support@scanly.io
+- **Email**: support@scanwyse.io
 
-- **Twitter**: [@scanly_io](https://twitter.com/scanly_io)// Publish
+- **Twitter**: [@scanwyse_io](https://twitter.com/scanwyse_io)// Publish
 
 await micrositeApi.publish(id);
 
@@ -654,7 +654,7 @@ await micrositeApi.publish(id);
 
 
 
-**[Website](https://scanly.io)** • **[Demo](https://demo.scanly.io)** • **[Docs](https://docs.scanly.io)** • **[Blog](https://blog.scanly.io)**```bash
+**[Website](https://scanwyse.io)** • **[Demo](https://demo.scanwyse.io)** • **[Docs](https://docs.scanwyse.io)** • **[Blog](https://blog.scanwyse.io)**```bash
 
 npm run dev          # Start dev server
 
@@ -734,7 +734,7 @@ This project is licensed under the MIT License.
 For issues and questions:
 - Create an issue on GitHub
 - Check existing documentation
-- Review the [backend repository](https://github.com/Scanly-io/qr-backend)
+- Review the [backend repository](https://github.com/ScanWyse-io/qr-backend)
 
 ---
 

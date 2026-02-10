@@ -34,7 +34,7 @@ export function OnboardingModal({
 
   const steps: Step[] = [
     {
-      title: 'Welcome to Scanly 🚀',
+      title: 'Welcome to ScanWyse 🚀',
       description: 'Build beautiful microsites with QR codes in minutes.',
       icon: Sparkles,
       content: (
@@ -109,7 +109,7 @@ export function OnboardingModal({
       content: (
         <div className="text-center space-y-3">
           <p className="text-gray-700">
-            You’re ready to create and publish your first Scanly microsite.
+            You’re ready to create and publish your first ScanWyse microsite.
           </p>
           <p className="text-sm text-gray-500">
             You can revisit this tutorial anytime from settings.

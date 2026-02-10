@@ -195,7 +195,7 @@ export function DomainsSettings() {
         <div className="p-6 border-b bg-gradient-to-r from-indigo-500 to-purple-600">
           <h2 className="text-lg font-semibold text-white">Free Subdomain</h2>
           <p className="text-sm text-indigo-100 mt-1">
-            Claim your free subdomain (yourname.scanly.io)
+            Claim your free subdomain (yourname.scanwyse.io)
           </p>
         </div>
         <div className="p-6">
@@ -206,20 +206,20 @@ export function DomainsSettings() {
                   <Globe className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{subdomain.subdomain}.scanly.io</p>
+                  <p className="font-medium text-gray-900">{subdomain.subdomain}.scanwyse.io</p>
                   <p className="text-sm text-gray-500">Your free subdomain</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => copyToClipboard(`https://${subdomain.subdomain}.scanly.io`)}
+                  onClick={() => copyToClipboard(`https://${subdomain.subdomain}.scanwyse.io`)}
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                   title="Copy URL"
                 >
                   <Copy className="w-4 h-4" />
                 </button>
                 <a
-                  href={`https://${subdomain.subdomain}.scanly.io`}
+                  href={`https://${subdomain.subdomain}.scanwyse.io`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -241,7 +241,7 @@ export function DomainsSettings() {
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    .scanly.io
+                    .scanwyse.io
                   </span>
                 </div>
                 <button

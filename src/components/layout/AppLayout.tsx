@@ -108,7 +108,7 @@ export function AppLayout({ children, showSidebar = true }: AppLayoutProps) {
                 <QrCode className="w-5 h-5 text-white" />
               </div>
               <span className="hidden sm:inline text-xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-                Scanly
+                ScanWyse
               </span>
             </Link>
           </div>

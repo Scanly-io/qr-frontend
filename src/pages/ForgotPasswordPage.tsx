@@ -141,7 +141,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="mt-8 text-center text-xs text-slate-400">
-          <p>© 2026 Scanly. All rights reserved.</p>
+          <p>© 2026 ScanWyse. All rights reserved.</p>
         </div>
       </div>
     </div>

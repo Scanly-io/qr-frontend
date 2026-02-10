@@ -55,7 +55,7 @@ export default function LoginPage() {
             <QrCode className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h1>
-          <p className="text-slate-500 text-sm">Sign in to your Scanly account</p>
+          <p className="text-slate-500 text-sm">Sign in to your ScanWyse account</p>
         </div>
 
         {/* Login Form */}
@@ -155,7 +155,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center text-xs text-slate-400">
-          <p>© 2026 Scanly. All rights reserved.</p>
+          <p>© 2026 ScanWyse. All rights reserved.</p>
         </div>
       </div>
     </div>
