@@ -1,4 +1,3 @@
-
 import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,7 +19,6 @@ import {
   TeamsIcon,
   BrandColors 
 } from '@/components/icons/BrandIcons';
-import { trackCTA } from '@/utils/trackCTA';
 
 interface ScheduleBlockProps {
   block: Block;
@@ -93,10 +91,7 @@ function formatTime(time: string): string {
 }
 
 export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
-  // Step state for minimal style: 'quick' or 'all'
-  const [minimalStep, setMinimalStep] = useState<'quick' | 'all'>('quick');
-  // Step state for cards style: 'service' or 'time'
-  const [cardsStep, setCardsStep] = useState<'service' | 'time'>('service');
+  console.log('ScheduleBlock rendering', { block, theme });
   
   // Payment context for pre-authorization
   const payment = usePayment();
@@ -117,14 +112,17 @@ export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerNotes, setCustomerNotes] = useState('');
 
+  // Quick slot state
+  const [quickSlot, setQuickSlot] = useState<string | null>(null);
+
   // Content
   const content = block?.content || {};
   const title = (content.title as string) || 'Book an Appointment';
   const subtitle = (content.subtitle as string) || 'Select a time that works for you';
   const calendlyUrl = content.calendlyUrl as string;
   const style = (content.style as 'calendar' | 'list' | 'minimal' | 'embedded' | 'cards') || 'calendar';
-  // Minimum notice: hours in advance required to book (from editor)
-  const noticeHours = (content.minNotice as number) || 0;
+  
+  // Services
   const services: ServiceType[] = useMemo(() => (content.services as ServiceType[]) || [
     { id: '1', name: '30-Minute Consultation', duration: 30, price: 0, icon: 'video', description: 'Quick intro call', calendarType: 'google' },
     { id: '2', name: '1-Hour Strategy Session', duration: 60, price: 99, icon: 'zoom', description: 'Deep dive into your needs', requiresPayment: true, calendarType: 'google' },
@@ -133,48 +131,30 @@ export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
   
   // Auto-select first service if not in cards style
   useEffect(() => {
+    console.log('useEffect running', { selectedService, style, servicesLength: services.length });
+    // Only auto-select if we haven't selected anything yet and we have services
     if (selectedService === null && style !== 'cards' && services.length > 0) {
+      console.log('Auto-selecting first service:', services[0].id);
       setSelectedService(services[0].id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Only run once on mount
   
-  // Auto-generate available time slots based on settings
-  const startTime = (content.startTime as string) || '09:00'; // e.g. '09:00'
-  const endTime = (content.endTime as string) || '17:00'; // e.g. '17:00'
-  const slotDuration = (content.slotDuration as number) || 30; // in minutes
-  const bufferTime = (content.bufferTime as number) || 0; // in minutes
-  const customUnavailable = (content.unavailableSlots as string[]) || [];
-
-  function generateTimeSlots() {
-    const slots: TimeSlot[] = [];
-    // Parse start/end time
-    const [startHour, startMin] = startTime.split(':').map(Number);
-    const [endHour, endMin] = endTime.split(':').map(Number);
-    const start = new Date();
-    start.setHours(startHour, startMin, 0, 0);
-    const end = new Date();
-    end.setHours(endHour, endMin, 0, 0);
-  const current = new Date(start);
-    const now = new Date();
-    while (current < end) {
-      const timeStr = `${current.getHours().toString().padStart(2, '0')}:${current.getMinutes().toString().padStart(2, '0')}`;
-      // Calculate if slot is within notice period
-      const slotDate = new Date(current);
-      const diffMs = slotDate.getTime() - now.getTime();
-      const diffHours = diffMs / (1000 * 60 * 60);
-      const isTooSoon = noticeHours > 0 && diffHours < noticeHours;
-      slots.push({
-        time: timeStr,
-        available: !customUnavailable.includes(timeStr) && !isTooSoon,
-        duration: slotDuration,
-      });
-      current.setMinutes(current.getMinutes() + slotDuration + bufferTime);
-    }
-    return slots;
-  }
-
-  const availableSlots: TimeSlot[] = generateTimeSlots();
+  // Available time slots (sample data)
+  const availableSlots: TimeSlot[] = (content.timeSlots as TimeSlot[]) || [
+    { time: '09:00', available: true },
+    { time: '09:30', available: false },
+    { time: '10:00', available: true },
+    { time: '10:30', available: true },
+    { time: '11:00', available: false },
+    { time: '11:30', available: true },
+    { time: '14:00', available: true },
+    { time: '14:30', available: true },
+    { time: '15:00', available: false },
+    { time: '15:30', available: true },
+    { time: '16:00', available: true },
+    { time: '16:30', available: true },
+  ];
 
   // Theme integration
   const primaryColor = theme?.branding?.primaryColor || theme?.button?.backgroundColor || '#6366f1';
@@ -315,16 +295,19 @@ export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
         });
         
         // Payment successful, proceed with booking
-        await createAppointment(appointmentData);
+        const response = await createAppointment(appointmentData);
+        console.log('Paid appointment created:', response);
       } else {
         // Free appointment, create directly
-        await createAppointment(appointmentData);
+        const response = await createAppointment(appointmentData);
+        console.log('Free appointment created:', response);
       }
       
       // Show success message and calendar export options
       setShowCalendarOptions(true);
       
     } catch (error) {
+      console.error('Error booking appointment:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to book appointment. Please try again.';
       alert(errorMessage);
     } finally {
@@ -386,7 +369,6 @@ END:VCALENDAR`;
     }
     
     if (calendarUrl) {
-      trackCTA(block.id, 'Add to Calendar', calendarUrl, 'schedule');
       window.open(calendarUrl, '_blank');
     }
   };
@@ -443,7 +425,6 @@ END:VCALENDAR`;
           style={{ backgroundColor: primaryColor }}
           whileHover={{ scale: 1.02, boxShadow: `0 10px 30px ${primaryColor}40` }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => trackCTA(block.id, 'Schedule with Calendly', calendlyUrl!, 'schedule')}
         >
           <CalendarCheck className="w-5 h-5" />
           <span>Schedule with Calendly</span>
@@ -474,10 +455,10 @@ END:VCALENDAR`;
             {subtitle}
           </p>
         </div>
-
-        {minimalStep === 'quick' && (
+        
+        {/* Minimal quick slot booking flow */}
+        {quickSlot === null ? (
           <>
-            {/* Quick time slots */}
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: bodyColor }}>
                 Next Available
@@ -495,7 +476,7 @@ END:VCALENDAR`;
                     backgroundColor: `${primaryColor}08`,
                   }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setMinimalStep('all')}
+                  onClick={() => setQuickSlot(slot)}
                 >
                   <div className="flex items-center gap-3">
                     <Clock className="w-5 h-5" style={{ color: primaryColor }} />
@@ -508,82 +489,149 @@ END:VCALENDAR`;
             <button 
               className="w-full mt-4 py-3 text-sm font-medium rounded-xl transition-colors"
               style={{ color: primaryColor }}
-              onClick={() => setMinimalStep('all')}
             >
               View all available times →
             </button>
           </>
-        )}
-
-        {minimalStep === 'all' && (
-          <>
-            {/* Day selector (reuse list style) */}
-            <div className="flex gap-2 overflow-x-auto pb-4 mb-6 -mx-2 px-2">
-              {Array.from({ length: 7 }, (_, i) => {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                const isDateSelected = selectedDate?.toDateString() === date.toDateString();
-                const dayName = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[date.getDay()];
-                return (
-                  <motion.button
-                    key={i}
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setSelectedTime(null);
-                    }}
-                    className="flex flex-col items-center min-w-[70px] py-3 px-4 rounded-xl transition-all"
-                    style={{
-                      backgroundColor: isDateSelected ? primaryColor : cardBg,
-                      border: `1px solid ${isDateSelected ? primaryColor : cardBorder}`,
-                      color: isDateSelected ? '#ffffff' : titleColor,
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <span className="text-xs font-medium opacity-70">{dayName}</span>
-                    <span className="text-lg font-bold">{date.getDate()}</span>
-                  </motion.button>
-                );
-              })}
+        ) : showCalendarOptions ? null : (
+          <div className="mt-6 space-y-4">
+            {/* Info form for quick slot */}
+            <div>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: titleColor }}>
+                Full Name <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={e => setCustomerName(e.target.value)}
+                placeholder="Enter your full name"
+                required
+                className="w-full px-4 py-3 rounded-xl text-sm transition-all focus:outline-none"
+                style={{
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                  border: `2px solid ${cardBorder}`,
+                  color: titleColor,
+                }}
+                onFocus={e => { e.target.style.borderColor = primaryColor; }}
+                onBlur={e => { e.target.style.borderColor = cardBorder; }}
+              />
             </div>
-            {/* Time slots */}
-            {selectedDate && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <p className="text-sm font-medium mb-3" style={{ color: bodyColor }}>
-                  Available times for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {availableSlots.filter(s => s.available).map((slot, idx) => (
-                    <motion.button
-                      key={idx}
-                      onClick={() => handleTimeSelect(slot.time)}
-                      className="py-3 rounded-lg font-medium text-sm transition-all"
-                      style={{
-                        backgroundColor: selectedTime === slot.time ? primaryColor : cardBg,
-                        color: selectedTime === slot.time ? '#fff' : titleColor,
-                        border: `1px solid ${selectedTime === slot.time ? primaryColor : cardBorder}`,
-                      }}
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      {formatTime(slot.time)}
-                    </motion.button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-            {/* Back button */}
+            <div>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: titleColor }}>
+                Email Address <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <input
+                type="email"
+                value={customerEmail}
+                onChange={e => setCustomerEmail(e.target.value)}
+                placeholder="your.email@example.com"
+                required
+                className="w-full px-4 py-3 rounded-xl text-sm transition-all focus:outline-none"
+                style={{
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                  border: `2px solid ${cardBorder}`,
+                  color: titleColor,
+                }}
+                onFocus={e => { e.target.style.borderColor = primaryColor; }}
+                onBlur={e => { e.target.style.borderColor = cardBorder; }}
+              />
+            </div>
+            <motion.button
+              onClick={() => setShowCalendarOptions(true)}
+              disabled={!customerName.trim() || !customerEmail.trim()}
+              className="w-full py-4 rounded-xl font-semibold text-white disabled:opacity-50"
+              style={{ backgroundColor: primaryColor }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Confirm Booking
+            </motion.button>
             <button
-              className="mt-6 text-sm text-muted-foreground underline"
-              onClick={() => setMinimalStep('quick')}
+              className="w-full mt-2 text-sm text-muted-foreground underline"
+              onClick={() => setQuickSlot(null)}
             >
               ← Back to Quick Slots
             </button>
-          </>
+          </div>
         )}
+        {/* Calendar export modal (shown after successful booking) */}
+        <AnimatePresence>
+          {showCalendarOptions && quickSlot && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+              onClick={() => { setShowCalendarOptions(false); setQuickSlot(null); }}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="max-w-md w-full rounded-2xl p-6"
+                style={{ backgroundColor: isDark ? '#18181b' : '#ffffff' }}
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="text-center mb-6">
+                  <div 
+                    className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+                    style={{ backgroundColor: `${BrandColors.googleCalendar}15` }}
+                  >
+                    <Check className="w-8 h-8" style={{ color: BrandColors.googleCalendar }} />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2" style={{ color: titleColor }}>
+                    Booking Confirmed!
+                  </h3>
+                  <p className="text-sm" style={{ color: bodyColor }}>
+                    Add this appointment to your calendar
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <motion.button
+                    className="w-full flex items-center gap-3 py-3 px-4 rounded-xl font-semibold"
+                    style={{ backgroundColor: BrandColors.googleCalendar, color: '#fff' }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => addToCalendar('google')}
+                  >
+                    <GoogleCalendarIcon className="w-6 h-6" />
+                    <span>Add to Google Calendar</span>
+                    <ChevronRight className="w-5 h-5 ml-auto" />
+                  </motion.button>
+                  <motion.button
+                    className="w-full flex items-center gap-3 py-3 px-4 rounded-xl font-semibold"
+                    style={{ backgroundColor: BrandColors.outlook, color: '#fff' }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => addToCalendar('outlook')}
+                  >
+                    <OutlookIcon className="w-6 h-6" />
+                    <span>Add to Outlook</span>
+                    <ChevronRight className="w-5 h-5 ml-auto" />
+                  </motion.button>
+                  <motion.button
+                    className="w-full flex items-center gap-3 py-3 px-4 rounded-xl font-semibold"
+                    style={{ backgroundColor: BrandColors.appleCalendar, color: '#fff' }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => addToCalendar('apple')}
+                  >
+                    <AppleCalendarIcon className="w-6 h-6" />
+                    <span>Add to Apple Calendar</span>
+                    <ChevronRight className="w-5 h-5 ml-auto" />
+                  </motion.button>
+                </div>
+                <button
+                  onClick={() => { setShowCalendarOptions(false); setQuickSlot(null); }}
+                  className="w-full mt-4 py-3 text-sm font-medium rounded-xl transition-colors"
+                  style={{ color: bodyColor, backgroundColor: `${bodyColor}10` }}
+                >
+                  Done
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
@@ -601,179 +649,110 @@ END:VCALENDAR`;
           </h2>
           <p style={{ fontFamily: bodyFontFamily, color: bodyColor }}>{subtitle}</p>
         </div>
-
-        {cardsStep === 'service' && (
-          <>
-            <div className="space-y-4">
-              {services.map((service, idx) => (
-                <motion.div
-                  key={service.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="rounded-2xl overflow-hidden cursor-pointer"
-                  style={{
-                    backgroundColor: cardBg,
-                    border: `2px solid ${selectedService === service.id ? primaryColor : cardBorder}`,
-                  }}
-                  onClick={() => setSelectedService(service.id)}
-                  whileHover={{ y: -2 }}
-                >
-                  <div className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div 
-                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
+        
+        <div className="space-y-4">
+          {services.map((service, idx) => (
+            <motion.div
+              key={service.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="rounded-2xl overflow-hidden cursor-pointer"
+              style={{
+                backgroundColor: cardBg,
+                border: `2px solid ${selectedService === service.id ? primaryColor : cardBorder}`,
+              }}
+              onClick={() => setSelectedService(service.id)}
+              whileHover={{ y: -2 }}
+            >
+              <div className="p-5">
+                <div className="flex items-start gap-4">
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
+                  >
+                    {getServiceIcon(service.icon)}
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-1">
+                      <h3 
+                        className="font-bold"
+                        style={{ fontFamily: titleFontFamily, color: titleColor }}
                       >
-                        {getServiceIcon(service.icon)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-1">
-                          <h3 
-                            className="font-bold"
-                            style={{ fontFamily: titleFontFamily, color: titleColor }}
-                          >
-                            {service.name}
-                          </h3>
-                          {/* Calendar integration badge */}
-                          {service.calendarType && (
-                            <div className="flex items-center gap-1">
-                              {getCalendarIcon(service.calendarType)}
-                            </div>
-                          )}
+                        {service.name}
+                      </h3>
+                      {/* Calendar integration badge */}
+                      {service.calendarType && (
+                        <div className="flex items-center gap-1">
+                          {getCalendarIcon(service.calendarType)}
                         </div>
-                        {service.description && (
-                          <p className="text-sm mb-2" style={{ color: bodyColor }}>
-                            {service.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <span className="text-sm flex items-center gap-1" style={{ color: bodyColor }}>
-                            <Timer className="w-4 h-4" />
-                            {service.duration} min
-                          </span>
-                          {service.price !== undefined && (
-                            <span className="font-semibold" style={{ color: primaryColor }}>
-                              {service.price === 0 ? 'Free' : `$${service.price}`}
-                            </span>
-                          )}
-                          {/* Payment required indicator */}
-                          {service.requiresPayment && service.price && service.price > 0 && (
-                            <span 
-                              className="text-xs flex items-center gap-1 px-2 py-1 rounded-full"
-                              style={{ 
-                                backgroundColor: `${primaryColor}10`,
-                                color: primaryColor,
-                              }}
-                            >
-                              <CreditCard className="w-3 h-3" />
-                              Pre-auth
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div 
-                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                          selectedService === service.id ? 'border-transparent' : ''
-                        }`}
-                        style={{ 
-                          borderColor: selectedService === service.id ? 'transparent' : cardBorder,
-                          backgroundColor: selectedService === service.id ? primaryColor : 'transparent',
-                        }}
-                      >
-                        {selectedService === service.id && (
-                          <Check className="w-4 h-4 text-white" />
-                        )}
-                      </div>
+                      )}
+                    </div>
+                    
+                    {service.description && (
+                      <p className="text-sm mb-2" style={{ color: bodyColor }}>
+                        {service.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="text-sm flex items-center gap-1" style={{ color: bodyColor }}>
+                        <Timer className="w-4 h-4" />
+                        {service.duration} min
+                      </span>
+                      {service.price !== undefined && (
+                        <span className="font-semibold" style={{ color: primaryColor }}>
+                          {service.price === 0 ? 'Free' : `$${service.price}`}
+                        </span>
+                      )}
+                      
+                      {/* Payment required indicator */}
+                      {service.requiresPayment && service.price && service.price > 0 && (
+                        <span 
+                          className="text-xs flex items-center gap-1 px-2 py-1 rounded-full"
+                          style={{ 
+                            backgroundColor: `${primaryColor}10`,
+                            color: primaryColor,
+                          }}
+                        >
+                          <CreditCard className="w-3 h-3" />
+                          Pre-auth
+                        </span>
+                      )}
                     </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-            {selectedService && (
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full mt-6 py-4 rounded-xl font-semibold text-white"
-                style={{ backgroundColor: primaryColor }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setCardsStep('time')}
-              >
-                Continue to Select Time
-              </motion.button>
-            )}
-          </>
-        )}
-        {cardsStep === 'time' && (
-          <>
-            {/* Time selection UI (reuse list style) */}
-            {/* Day selector */}
-            <div className="flex gap-2 overflow-x-auto pb-4 mb-6 -mx-2 px-2">
-              {Array.from({ length: 7 }, (_, i) => {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                const isDateSelected = selectedDate?.toDateString() === date.toDateString();
-                const dayName = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[date.getDay()];
-                return (
-                  <motion.button
-                    key={i}
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setSelectedTime(null);
+                  
+                  <div 
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                      selectedService === service.id ? 'border-transparent' : ''
+                    }`}
+                    style={{ 
+                      borderColor: selectedService === service.id ? 'transparent' : cardBorder,
+                      backgroundColor: selectedService === service.id ? primaryColor : 'transparent',
                     }}
-                    className="flex flex-col items-center min-w-[70px] py-3 px-4 rounded-xl transition-all"
-                    style={{
-                      backgroundColor: isDateSelected ? primaryColor : cardBg,
-                      border: `1px solid ${isDateSelected ? primaryColor : cardBorder}`,
-                      color: isDateSelected ? '#ffffff' : titleColor,
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
                   >
-                    <span className="text-xs font-medium opacity-70">{dayName}</span>
-                    <span className="text-lg font-bold">{date.getDate()}</span>
-                  </motion.button>
-                );
-              })}
-            </div>
-            {/* Time slots */}
-            {selectedDate && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <p className="text-sm font-medium mb-3" style={{ color: bodyColor }}>
-                  Available times for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {availableSlots.filter(s => s.available).map((slot, idx) => (
-                    <motion.button
-                      key={idx}
-                      onClick={() => handleTimeSelect(slot.time)}
-                      className="py-3 rounded-lg font-medium text-sm transition-all"
-                      style={{
-                        backgroundColor: selectedTime === slot.time ? primaryColor : cardBg,
-                        color: selectedTime === slot.time ? '#fff' : titleColor,
-                        border: `1px solid ${selectedTime === slot.time ? primaryColor : cardBorder}`,
-                      }}
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      {formatTime(slot.time)}
-                    </motion.button>
-                  ))}
+                    {selectedService === service.id && (
+                      <Check className="w-4 h-4 text-white" />
+                    )}
+                  </div>
                 </div>
-              </motion.div>
-            )}
-            {/* Back button */}
-            <button
-              className="mt-6 text-sm text-muted-foreground underline"
-              onClick={() => setCardsStep('service')}
-            >
-              ← Back to Service Selection
-            </button>
-          </>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        
+        {selectedService && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full mt-6 py-4 rounded-xl font-semibold text-white"
+            style={{ backgroundColor: primaryColor }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Continue to Select Time
+          </motion.button>
         )}
       </div>
     );
@@ -858,163 +837,19 @@ END:VCALENDAR`;
           </motion.div>
         )}
         
-        {/* Customer Info + Confirm */}
+        {/* Confirm button */}
         {selectedDate && selectedTime && (
-          <motion.div
+          <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 space-y-4"
+            className="w-full mt-6 py-4 rounded-xl font-semibold text-white"
+            style={{ backgroundColor: primaryColor }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: titleColor }}>
-                Full Name <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Enter your full name"
-                required
-                className="w-full px-4 py-3 rounded-xl text-sm transition-all focus:outline-none"
-                style={{
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                  border: `2px solid ${cardBorder}`,
-                  color: titleColor,
-                }}
-                onFocus={(e) => { e.target.style.borderColor = primaryColor; }}
-                onBlur={(e) => { e.target.style.borderColor = cardBorder; }}
-              />
-            </div>
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: titleColor }}>
-                Email Address <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="your.email@example.com"
-                required
-                className="w-full px-4 py-3 rounded-xl text-sm transition-all focus:outline-none"
-                style={{
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
-                  border: `2px solid ${cardBorder}`,
-                  color: titleColor,
-                }}
-                onFocus={(e) => { e.target.style.borderColor = primaryColor; }}
-                onBlur={(e) => { e.target.style.borderColor = cardBorder; }}
-              />
-            </div>
-            {/* Submit */}
-            <motion.button
-              onClick={handleSubmit}
-              disabled={isSubmitting || isCheckoutLoading || !customerName.trim() || !customerEmail.trim()}
-              className="w-full py-4 rounded-xl font-semibold text-white disabled:opacity-50"
-              style={{ backgroundColor: primaryColor }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isSubmitting || isCheckoutLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Processing...
-                </span>
-              ) : (
-                'Confirm Booking'
-              )}
-            </motion.button>
-          </motion.div>
+            Confirm Booking
+          </motion.button>
         )}
-
-        {/* Calendar export modal (shown after successful booking) */}
-        <AnimatePresence>
-          {showCalendarOptions && selectedDate && selectedTime && selectedService && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-              onClick={() => setShowCalendarOptions(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="max-w-md w-full rounded-2xl p-6"
-                style={{ backgroundColor: isDark ? '#18181b' : '#ffffff' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="text-center mb-6">
-                  <div 
-                    className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-                    style={{ backgroundColor: `${BrandColors.googleCalendar}15` }}
-                  >
-                    <Check className="w-8 h-8" style={{ color: BrandColors.googleCalendar }} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-2" style={{ color: titleColor }}>
-                    Booking Confirmed!
-                  </h3>
-                  <p className="text-sm" style={{ color: bodyColor }}>
-                    Add this appointment to your calendar
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <motion.button
-                    onClick={() => addToCalendar('google')}
-                    className="w-full flex items-center gap-3 p-4 rounded-xl transition-all"
-                    style={{ backgroundColor: cardBg, border: `1px solid ${cardBorder}` }}
-                    whileHover={{ borderColor: BrandColors.googleCalendar, backgroundColor: `${BrandColors.googleCalendar}08` }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <GoogleCalendarIcon className="w-6 h-6" style={{ color: BrandColors.googleCalendar }} />
-                    <div className="flex-1 text-left">
-                      <div className="font-semibold text-sm" style={{ color: titleColor }}>Google Calendar</div>
-                      <div className="text-xs" style={{ color: bodyColor }}>Add to Google Calendar</div>
-                    </div>
-                    <ChevronRight className="w-5 h-5" style={{ color: bodyColor }} />
-                  </motion.button>
-                  <motion.button
-                    onClick={() => addToCalendar('outlook')}
-                    className="w-full flex items-center gap-3 p-4 rounded-xl transition-all"
-                    style={{ backgroundColor: cardBg, border: `1px solid ${cardBorder}` }}
-                    whileHover={{ borderColor: BrandColors.outlook, backgroundColor: `${BrandColors.outlook}08` }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <OutlookIcon className="w-6 h-6" style={{ color: BrandColors.outlook }} />
-                    <div className="flex-1 text-left">
-                      <div className="font-semibold text-sm" style={{ color: titleColor }}>Outlook</div>
-                      <div className="text-xs" style={{ color: bodyColor }}>Add to Outlook Calendar</div>
-                    </div>
-                    <ChevronRight className="w-5 h-5" style={{ color: bodyColor }} />
-                  </motion.button>
-                  <motion.button
-                    onClick={() => addToCalendar('apple')}
-                    className="w-full flex items-center gap-3 p-4 rounded-xl transition-all"
-                    style={{ backgroundColor: cardBg, border: `1px solid ${cardBorder}` }}
-                    whileHover={{ borderColor: BrandColors.appleCalendar, backgroundColor: `${BrandColors.appleCalendar}08` }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <AppleCalendarIcon className="w-6 h-6" style={{ color: BrandColors.appleCalendar }} />
-                    <div className="flex-1 text-left">
-                      <div className="font-semibold text-sm" style={{ color: titleColor }}>Apple Calendar</div>
-                      <div className="text-xs" style={{ color: bodyColor }}>Download .ics file</div>
-                    </div>
-                    <ChevronRight className="w-5 h-5" style={{ color: bodyColor }} />
-                  </motion.button>
-                </div>
-                <button
-                  onClick={() => setShowCalendarOptions(false)}
-                  className="w-full mt-4 py-3 text-sm font-medium rounded-xl transition-colors"
-                  style={{ color: bodyColor, backgroundColor: `${bodyColor}10` }}
-                >
-                  Done
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     );
   }
@@ -1488,7 +1323,7 @@ END:VCALENDAR`;
       
       {/* Calendar export modal (shown after successful booking) */}
       <AnimatePresence>
-        {showCalendarOptions && selectedDate && selectedTime && selectedService && (
+        {showCalendarOptions && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
