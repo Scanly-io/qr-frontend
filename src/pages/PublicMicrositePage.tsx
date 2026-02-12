@@ -25,15 +25,19 @@ export default function PublicMicrositePage() {
   const { slug } = useParams<{ slug: string }>();
   const [data, setData] = useState<MicrositePublicData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showLoading, setShowLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
 
+    let loadingTimeout: ReturnType<typeof setTimeout>;
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
+        setShowLoading(false);
+        loadingTimeout = setTimeout(() => setShowLoading(true), 150);
 
         const response = await fetch(`${API_BASE_URL}/public/${slug}/data`);
 
@@ -50,32 +54,29 @@ export default function PublicMicrositePage() {
         const json: MicrositePublicData = await response.json();
         setData(json);
 
-        // Set the QR slug for CTA tracking so events use the
-        // canonical qrId (e.g. "qr-a6ec9ceb") instead of the UUID path
         if (json.qrId) {
           setTrackingSlug(json.qrId);
         }
 
-        // Set page title
         if (json.title) {
           document.title = json.title;
         }
-
-        // Analytics are tracked automatically by the backend when
-        // /public/:slug/data is called - no need for manual tracking
       } catch (err) {
         console.error('Failed to load microsite:', err);
         setError('network-error');
       } finally {
         setLoading(false);
+        clearTimeout(loadingTimeout);
+        setShowLoading(false);
       }
     };
 
     fetchData();
+    return () => clearTimeout(loadingTimeout);
   }, [slug]);
 
   // Loading state
-  if (loading) {
+  if (loading && showLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
