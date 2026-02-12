@@ -248,13 +248,16 @@ export default function DashboardPage() {
                   {/* Card Actions */}
                   <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-3 flex items-center gap-2">
                     <Tooltip content="Open live microsite in new tab" side="bottom">
+                    <Tooltip content={microsite.qrId ? "Open live microsite in new tab" : "No microsite published yet"} side="bottom">
                       <button
-                        onClick={() => window.open(`/public/${microsite.qrId}`, '_blank')}
-                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all font-medium"
+                        onClick={microsite.qrId ? () => window.open(`/public/${microsite.qrId}`, '_blank') : undefined}
+                        disabled={!microsite.qrId}
+                        className={`flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg transition-all font-medium ${microsite.qrId ? "text-slate-600 hover:bg-slate-50 hover:border-slate-300" : "text-slate-400 opacity-50 cursor-not-allowed"}`}
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         Preview
                       </button>
+                    </Tooltip>
                     </Tooltip>
                     
                     <button
