@@ -93,6 +93,8 @@ function formatTime(time: string): string {
 }
 
 export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
+  // Step state for minimal style: 'quick' or 'all'
+  const [minimalStep, setMinimalStep] = useState<'quick' | 'all'>('quick');
   // Step state for cards style: 'service' or 'time'
   const [cardsStep, setCardsStep] = useState<'service' | 'time'>('service');
   
@@ -472,42 +474,116 @@ END:VCALENDAR`;
             {subtitle}
           </p>
         </div>
-        
-        {/* Quick time slots */}
-        <div className="space-y-3">
-          <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: bodyColor }}>
-            Next Available
-          </p>
-          
-          {['Today, 2:00 PM', 'Today, 4:30 PM', 'Tomorrow, 10:00 AM', 'Tomorrow, 2:00 PM'].map((slot, idx) => (
-            <motion.button
-              key={idx}
-              className="w-full flex items-center justify-between p-4 rounded-xl transition-all"
-              style={{
-                backgroundColor: cardBg,
-                border: `1px solid ${cardBorder}`,
-              }}
-              whileHover={{ 
-                borderColor: primaryColor,
-                backgroundColor: `${primaryColor}08`,
-              }}
-              whileTap={{ scale: 0.98 }}
+
+        {minimalStep === 'quick' && (
+          <>
+            {/* Quick time slots */}
+            <div className="space-y-3">
+              <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: bodyColor }}>
+                Next Available
+              </p>
+              {['Today, 2:00 PM', 'Today, 4:30 PM', 'Tomorrow, 10:00 AM', 'Tomorrow, 2:00 PM'].map((slot, idx) => (
+                <motion.button
+                  key={idx}
+                  className="w-full flex items-center justify-between p-4 rounded-xl transition-all"
+                  style={{
+                    backgroundColor: cardBg,
+                    border: `1px solid ${cardBorder}`,
+                  }}
+                  whileHover={{ 
+                    borderColor: primaryColor,
+                    backgroundColor: `${primaryColor}08`,
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setMinimalStep('all')}
+                >
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5" style={{ color: primaryColor }} />
+                    <span className="font-medium" style={{ color: titleColor }}>{slot}</span>
+                  </div>
+                  <ChevronRight className="w-5 h-5" style={{ color: bodyColor }} />
+                </motion.button>
+              ))}
+            </div>
+            <button 
+              className="w-full mt-4 py-3 text-sm font-medium rounded-xl transition-colors"
+              style={{ color: primaryColor }}
+              onClick={() => setMinimalStep('all')}
             >
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5" style={{ color: primaryColor }} />
-                <span className="font-medium" style={{ color: titleColor }}>{slot}</span>
-              </div>
-              <ChevronRight className="w-5 h-5" style={{ color: bodyColor }} />
-            </motion.button>
-          ))}
-        </div>
-        
-        <button 
-          className="w-full mt-4 py-3 text-sm font-medium rounded-xl transition-colors"
-          style={{ color: primaryColor }}
-        >
-          View all available times →
-        </button>
+              View all available times →
+            </button>
+          </>
+        )}
+
+        {minimalStep === 'all' && (
+          <>
+            {/* Day selector (reuse list style) */}
+            <div className="flex gap-2 overflow-x-auto pb-4 mb-6 -mx-2 px-2">
+              {Array.from({ length: 7 }, (_, i) => {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const isDateSelected = selectedDate?.toDateString() === date.toDateString();
+                const dayName = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[date.getDay()];
+                return (
+                  <motion.button
+                    key={i}
+                    onClick={() => {
+                      setSelectedDate(date);
+                      setSelectedTime(null);
+                    }}
+                    className="flex flex-col items-center min-w-[70px] py-3 px-4 rounded-xl transition-all"
+                    style={{
+                      backgroundColor: isDateSelected ? primaryColor : cardBg,
+                      border: `1px solid ${isDateSelected ? primaryColor : cardBorder}`,
+                      color: isDateSelected ? '#ffffff' : titleColor,
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className="text-xs font-medium opacity-70">{dayName}</span>
+                    <span className="text-lg font-bold">{date.getDate()}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+            {/* Time slots */}
+            {selectedDate && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <p className="text-sm font-medium mb-3" style={{ color: bodyColor }}>
+                  Available times for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {availableSlots.filter(s => s.available).map((slot, idx) => (
+                    <motion.button
+                      key={idx}
+                      onClick={() => handleTimeSelect(slot.time)}
+                      className="py-3 rounded-lg font-medium text-sm transition-all"
+                      style={{
+                        backgroundColor: selectedTime === slot.time ? primaryColor : cardBg,
+                        color: selectedTime === slot.time ? '#fff' : titleColor,
+                        border: `1px solid ${selectedTime === slot.time ? primaryColor : cardBorder}`,
+                      }}
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      {formatTime(slot.time)}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+            {/* Back button */}
+            <button
+              className="mt-6 text-sm text-muted-foreground underline"
+              onClick={() => setMinimalStep('quick')}
+            >
+              ← Back to Quick Slots
+            </button>
+          </>
+        )}
       </div>
     );
   }
