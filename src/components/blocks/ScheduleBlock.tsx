@@ -134,21 +134,36 @@ export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  // Available time slots (sample data)
-  const availableSlots: TimeSlot[] = (content.timeSlots as TimeSlot[]) || [
-    { time: '09:00', available: true },
-    { time: '09:30', available: false },
-    { time: '10:00', available: true },
-    { time: '10:30', available: true },
-    { time: '11:00', available: false },
-    { time: '11:30', available: true },
-    { time: '14:00', available: true },
-    { time: '14:30', available: true },
-    { time: '15:00', available: false },
-    { time: '15:30', available: true },
-    { time: '16:00', available: true },
-    { time: '16:30', available: true },
-  ];
+  // Auto-generate available time slots based on settings
+  const startTime = (content.startTime as string) || '09:00'; // e.g. '09:00'
+  const endTime = (content.endTime as string) || '17:00'; // e.g. '17:00'
+  const slotDuration = (content.slotDuration as number) || 30; // in minutes
+  const bufferTime = (content.bufferTime as number) || 0; // in minutes
+  const customUnavailable = (content.unavailableSlots as string[]) || [];
+
+  function generateTimeSlots() {
+    const slots: TimeSlot[] = [];
+    // Parse start/end time
+    const [startHour, startMin] = startTime.split(':').map(Number);
+    const [endHour, endMin] = endTime.split(':').map(Number);
+    const start = new Date();
+    start.setHours(startHour, startMin, 0, 0);
+    const end = new Date();
+    end.setHours(endHour, endMin, 0, 0);
+  const current = new Date(start);
+    while (current < end) {
+      const timeStr = `${current.getHours().toString().padStart(2, '0')}:${current.getMinutes().toString().padStart(2, '0')}`;
+      slots.push({
+        time: timeStr,
+        available: !customUnavailable.includes(timeStr),
+        duration: slotDuration,
+      });
+      current.setMinutes(current.getMinutes() + slotDuration + bufferTime);
+    }
+    return slots;
+  }
+
+  const availableSlots: TimeSlot[] = generateTimeSlots();
 
   // Theme integration
   const primaryColor = theme?.branding?.primaryColor || theme?.button?.backgroundColor || '#6366f1';
