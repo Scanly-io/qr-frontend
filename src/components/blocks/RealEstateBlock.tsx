@@ -432,10 +432,17 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
                   <div className="flex items-center gap-3">
                     {property.agent.photo ? (
                       <img 
-                        src={property.agent.photo} 
+                        src={property.agent.photo}
+                        srcSet={`
+                          ${property.agent.photo}&fm=webp&w=48 48w,
+                          ${property.agent.photo}&fm=webp&w=96 96w,
+                          ${property.agent.photo}&fm=webp&w=192 192w
+                        `}
+                        sizes="(max-width: 600px) 48px, (max-width: 900px) 96px, 192px"
                         alt={property.agent.name}
                         className="w-12 h-12 rounded-full object-cover ring-2 ring-offset-2"
                         style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
+                        loading="lazy"
                       />
                     ) : (
                       <div 

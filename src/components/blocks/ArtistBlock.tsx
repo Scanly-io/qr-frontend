@@ -196,7 +196,13 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
             {/* Album Art */}
             <div className="w-full aspect-square relative">
               <img 
-                src={displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400'} 
+                src={displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400'}
+                srcSet={`
+                  ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400')}&fm=webp&w=200 200w,
+                  ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400')}&fm=webp&w=400 400w,
+                  ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400')}&fm=webp&w=800 800w
+                `}
+                sizes="(max-width: 600px) 200px, (max-width: 900px) 400px, 800px"
                 alt={displayTracks[currentTrack]?.title}
                 className="w-full h-full object-cover"
               />
@@ -359,6 +365,12 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
               {/* Cover art */}
               <img 
                 src={track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100'}
+                srcSet={`
+                  ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100')}&fm=webp&w=48 48w,
+                  ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100')}&fm=webp&w=96 96w,
+                  ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100')}&fm=webp&w=192 192w
+                `}
+                sizes="(max-width: 600px) 48px, (max-width: 900px) 96px, 192px"
                 alt={track.title}
                 className="w-10 h-10 rounded object-cover"
               />
@@ -448,6 +460,12 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
               >
                 <img 
                   src={displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200'}
+                  srcSet={`
+                    ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=200 200w,
+                    ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=400 400w,
+                    ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=800 800w
+                  `}
+                  sizes="(max-width: 600px) 200px, (max-width: 900px) 400px, 800px"
                   alt=""
                   className="w-full h-full object-cover opacity-80"
                 />
@@ -529,6 +547,12 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
               >
                 <img 
                   src={track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200'}
+                  srcSet={`
+                    ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=200 200w,
+                    ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=400 400w,
+                    ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=800 800w
+                  `}
+                  sizes="(max-width: 600px) 200px, (max-width: 900px) 400px, 800px"
                   alt={track.title}
                   className="w-full h-full object-cover"
                 />
@@ -573,6 +597,12 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
               >
                 <img 
                   src={artwork.image}
+                  srcSet={`
+                    ${artwork.image}&fm=webp&w=400 400w,
+                    ${artwork.image}&fm=webp&w=800 800w,
+                    ${artwork.image}&fm=webp&w=1200 1200w
+                  `}
+                  sizes="(max-width: 600px) 400px, (max-width: 900px) 800px, 1200px"
                   alt={artwork.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
@@ -659,6 +689,12 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
               >
                 <img 
                   src={displayArtworks[lightboxIndex].image}
+                  srcSet={`
+                    ${displayArtworks[lightboxIndex].image}&fm=webp&w=400 400w,
+                    ${displayArtworks[lightboxIndex].image}&fm=webp&w=800 800w,
+                    ${displayArtworks[lightboxIndex].image}&fm=webp&w=1200 1200w
+                  `}
+                  sizes="(max-width: 600px) 400px, (max-width: 900px) 800px, 1200px"
                   alt={displayArtworks[lightboxIndex].title}
                   className="max-w-full max-h-[70vh] object-contain rounded-lg"
                 />
@@ -810,6 +846,12 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
             >
               <img 
                 src={track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200'}
+                srcSet={`
+                  ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=200 200w,
+                  ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=400 400w,
+                  ${(track.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200')}&fm=webp&w=800 800w
+                `}
+                sizes="(max-width: 600px) 200px, (max-width: 900px) 400px, 800px"
                 alt={track.title}
                 className="w-full h-full object-cover"
               />
@@ -852,6 +894,12 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
         >
           <img 
             src={displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100'}
+            srcSet={`
+              ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100')}&fm=webp&w=48 48w,
+              ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100')}&fm=webp&w=96 96w,
+              ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100')}&fm=webp&w=192 192w
+            `}
+            sizes="(max-width: 600px) 48px, (max-width: 900px) 96px, 192px"
             alt={displayTracks[currentTrack]?.title}
             className="w-12 h-12 rounded-lg object-cover"
           />

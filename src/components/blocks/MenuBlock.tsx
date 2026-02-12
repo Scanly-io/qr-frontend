@@ -260,11 +260,11 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
                 <img 
                   src={item.image}
                   srcSet={`
-                    ${item.image}&fm=webp&w=200 200w,
-                    ${item.image}&fm=webp&w=400 400w,
-                    ${item.image}&fm=webp&w=800 800w
+                    ${item.image}&fm=webp&w=64 64w,
+                    ${item.image}&fm=webp&w=128 128w,
+                    ${item.image}&fm=webp&w=256 256w
                   `}
-                  sizes="(max-width: 600px) 200px, (max-width: 900px) 400px, 800px"
+                  sizes="(max-width: 600px) 64px, (max-width: 900px) 128px, 256px"
                   alt={item.name}
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -465,9 +465,16 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
             {showImages && item.image && (
               <div className="aspect-[4/3] relative overflow-hidden">
                 <img 
-                  src={item.image} 
+                  src={item.image}
+                  srcSet={`
+                    ${item.image}&fm=webp&w=400 400w,
+                    ${item.image}&fm=webp&w=800 800w,
+                    ${item.image}&fm=webp&w=1200 1200w
+                  `}
+                  sizes="(max-width: 600px) 400px, (max-width: 900px) 800px, 1200px"
                   alt={item.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
                 />
                 
                 {/* Badges overlay */}
@@ -649,9 +656,16 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
         >
           {showImages && item.image && (
             <img 
-              src={item.image} 
+              src={item.image}
+              srcSet={`
+                ${item.image}&fm=webp&w=48 48w,
+                ${item.image}&fm=webp&w=96 96w,
+                ${item.image}&fm=webp&w=192 192w
+              `}
+              sizes="(max-width: 600px) 48px, (max-width: 900px) 96px, 192px"
               alt={item.name}
               className="w-12 h-12 rounded-lg object-cover"
+              loading="lazy"
             />
           )}
           
@@ -710,9 +724,16 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
       >
         {item.image ? (
           <img 
-            src={item.image} 
+            src={item.image}
+            srcSet={`
+              ${item.image}&fm=webp&w=200 200w,
+              ${item.image}&fm=webp&w=400 400w,
+              ${item.image}&fm=webp&w=800 800w
+            `}
+            sizes="(max-width: 600px) 200px, (max-width: 900px) 400px, 800px"
             alt={item.name}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
         ) : (
           <div 
