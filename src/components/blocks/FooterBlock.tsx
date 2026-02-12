@@ -255,7 +255,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
             <p className={`text-sm ${styles.text}`}>{copyrightText}</p>
             {showBranding && (
               <p className={`text-xs flex items-center gap-1 ${styles.text}`}>
-                Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> using Scanly
+                Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> using ScanWyse
               </p>
             )}
           </div>
@@ -313,7 +313,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
           
           {showBranding && (
             <p className={`text-xs mt-3 flex items-center gap-1 ${styles.text}`}>
-              Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> using Scanly
+              Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> using ScanWyse
             </p>
           )}
         </div>
@@ -416,7 +416,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
           
           {showBranding && (
             <p className={`text-xs mt-2 flex items-center justify-center gap-1 ${styles.text}`}>
-              Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> using Scanly
+              Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> using ScanWyse
             </p>
           )}
         </div>
@@ -604,7 +604,7 @@ export default function FooterBlock({ block, theme }: FooterBlockProps) {
           
           {showBranding && (
             <p className={`text-xs flex items-center gap-1.5 ${styles.text}`}>
-              Made with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" /> using Scanly
+              Made with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" /> using ScanWyse
             </p>
           )}
         </div>

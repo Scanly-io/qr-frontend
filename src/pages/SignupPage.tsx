@@ -62,7 +62,7 @@ export default function SignupPage() {
             <QrCode className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-1">Create your account</h1>
-          <p className="text-slate-500 text-sm">Start building QR microsites with Scanly</p>
+          <p className="text-slate-500 text-sm">Start building QR microsites with ScanWyse</p>
         </div>
 
         {/* Signup Form */}
@@ -192,7 +192,7 @@ export default function SignupPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center text-xs text-slate-400">
-          <p>© 2026 Scanly. All rights reserved.</p>
+          <p>© 2026 ScanWyse. All rights reserved.</p>
         </div>
       </div>
     </div>
