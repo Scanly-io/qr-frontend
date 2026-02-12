@@ -93,6 +93,8 @@ function formatTime(time: string): string {
 }
 
 export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
+  // Step state for cards style: 'service' or 'time'
+  const [cardsStep, setCardsStep] = useState<'service' | 'time'>('service');
   
   // Payment context for pre-authorization
   const payment = usePayment();
@@ -523,110 +525,179 @@ END:VCALENDAR`;
           </h2>
           <p style={{ fontFamily: bodyFontFamily, color: bodyColor }}>{subtitle}</p>
         </div>
-        
-        <div className="space-y-4">
-          {services.map((service, idx) => (
-            <motion.div
-              key={service.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="rounded-2xl overflow-hidden cursor-pointer"
-              style={{
-                backgroundColor: cardBg,
-                border: `2px solid ${selectedService === service.id ? primaryColor : cardBorder}`,
-              }}
-              onClick={() => setSelectedService(service.id)}
-              whileHover={{ y: -2 }}
-            >
-              <div className="p-5">
-                <div className="flex items-start gap-4">
-                  <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
-                  >
-                    {getServiceIcon(service.icon)}
-                  </div>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-1">
-                      <h3 
-                        className="font-bold"
-                        style={{ fontFamily: titleFontFamily, color: titleColor }}
+
+        {cardsStep === 'service' && (
+          <>
+            <div className="space-y-4">
+              {services.map((service, idx) => (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="rounded-2xl overflow-hidden cursor-pointer"
+                  style={{
+                    backgroundColor: cardBg,
+                    border: `2px solid ${selectedService === service.id ? primaryColor : cardBorder}`,
+                  }}
+                  onClick={() => setSelectedService(service.id)}
+                  whileHover={{ y: -2 }}
+                >
+                  <div className="p-5">
+                    <div className="flex items-start gap-4">
+                      <div 
+                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
                       >
-                        {service.name}
-                      </h3>
-                      {/* Calendar integration badge */}
-                      {service.calendarType && (
-                        <div className="flex items-center gap-1">
-                          {getCalendarIcon(service.calendarType)}
+                        {getServiceIcon(service.icon)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-1">
+                          <h3 
+                            className="font-bold"
+                            style={{ fontFamily: titleFontFamily, color: titleColor }}
+                          >
+                            {service.name}
+                          </h3>
+                          {/* Calendar integration badge */}
+                          {service.calendarType && (
+                            <div className="flex items-center gap-1">
+                              {getCalendarIcon(service.calendarType)}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    
-                    {service.description && (
-                      <p className="text-sm mb-2" style={{ color: bodyColor }}>
-                        {service.description}
-                      </p>
-                    )}
-                    
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-sm flex items-center gap-1" style={{ color: bodyColor }}>
-                        <Timer className="w-4 h-4" />
-                        {service.duration} min
-                      </span>
-                      {service.price !== undefined && (
-                        <span className="font-semibold" style={{ color: primaryColor }}>
-                          {service.price === 0 ? 'Free' : `$${service.price}`}
-                        </span>
-                      )}
-                      
-                      {/* Payment required indicator */}
-                      {service.requiresPayment && service.price && service.price > 0 && (
-                        <span 
-                          className="text-xs flex items-center gap-1 px-2 py-1 rounded-full"
-                          style={{ 
-                            backgroundColor: `${primaryColor}10`,
-                            color: primaryColor,
-                          }}
-                        >
-                          <CreditCard className="w-3 h-3" />
-                          Pre-auth
-                        </span>
-                      )}
+                        {service.description && (
+                          <p className="text-sm mb-2" style={{ color: bodyColor }}>
+                            {service.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-sm flex items-center gap-1" style={{ color: bodyColor }}>
+                            <Timer className="w-4 h-4" />
+                            {service.duration} min
+                          </span>
+                          {service.price !== undefined && (
+                            <span className="font-semibold" style={{ color: primaryColor }}>
+                              {service.price === 0 ? 'Free' : `$${service.price}`}
+                            </span>
+                          )}
+                          {/* Payment required indicator */}
+                          {service.requiresPayment && service.price && service.price > 0 && (
+                            <span 
+                              className="text-xs flex items-center gap-1 px-2 py-1 rounded-full"
+                              style={{ 
+                                backgroundColor: `${primaryColor}10`,
+                                color: primaryColor,
+                              }}
+                            >
+                              <CreditCard className="w-3 h-3" />
+                              Pre-auth
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div 
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                          selectedService === service.id ? 'border-transparent' : ''
+                        }`}
+                        style={{ 
+                          borderColor: selectedService === service.id ? 'transparent' : cardBorder,
+                          backgroundColor: selectedService === service.id ? primaryColor : 'transparent',
+                        }}
+                      >
+                        {selectedService === service.id && (
+                          <Check className="w-4 h-4 text-white" />
+                        )}
+                      </div>
                     </div>
                   </div>
-                  
-                  <div 
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      selectedService === service.id ? 'border-transparent' : ''
-                    }`}
-                    style={{ 
-                      borderColor: selectedService === service.id ? 'transparent' : cardBorder,
-                      backgroundColor: selectedService === service.id ? primaryColor : 'transparent',
+                </motion.div>
+              ))}
+            </div>
+            {selectedService && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full mt-6 py-4 rounded-xl font-semibold text-white"
+                style={{ backgroundColor: primaryColor }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setCardsStep('time')}
+              >
+                Continue to Select Time
+              </motion.button>
+            )}
+          </>
+        )}
+        {cardsStep === 'time' && (
+          <>
+            {/* Time selection UI (reuse list style) */}
+            {/* Day selector */}
+            <div className="flex gap-2 overflow-x-auto pb-4 mb-6 -mx-2 px-2">
+              {Array.from({ length: 7 }, (_, i) => {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const isDateSelected = selectedDate?.toDateString() === date.toDateString();
+                const dayName = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : dayNames[date.getDay()];
+                return (
+                  <motion.button
+                    key={i}
+                    onClick={() => {
+                      setSelectedDate(date);
+                      setSelectedTime(null);
                     }}
+                    className="flex flex-col items-center min-w-[70px] py-3 px-4 rounded-xl transition-all"
+                    style={{
+                      backgroundColor: isDateSelected ? primaryColor : cardBg,
+                      border: `1px solid ${isDateSelected ? primaryColor : cardBorder}`,
+                      color: isDateSelected ? '#ffffff' : titleColor,
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    {selectedService === service.id && (
-                      <Check className="w-4 h-4 text-white" />
-                    )}
-                  </div>
+                    <span className="text-xs font-medium opacity-70">{dayName}</span>
+                    <span className="text-lg font-bold">{date.getDate()}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+            {/* Time slots */}
+            {selectedDate && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <p className="text-sm font-medium mb-3" style={{ color: bodyColor }}>
+                  Available times for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {availableSlots.filter(s => s.available).map((slot, idx) => (
+                    <motion.button
+                      key={idx}
+                      onClick={() => handleTimeSelect(slot.time)}
+                      className="py-3 rounded-lg font-medium text-sm transition-all"
+                      style={{
+                        backgroundColor: selectedTime === slot.time ? primaryColor : cardBg,
+                        color: selectedTime === slot.time ? '#fff' : titleColor,
+                        border: `1px solid ${selectedTime === slot.time ? primaryColor : cardBorder}`,
+                      }}
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      {formatTime(slot.time)}
+                    </motion.button>
+                  ))}
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-        
-        {selectedService && (
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full mt-6 py-4 rounded-xl font-semibold text-white"
-            style={{ backgroundColor: primaryColor }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Continue to Select Time
-          </motion.button>
+              </motion.div>
+            )}
+            {/* Back button */}
+            <button
+              className="mt-6 text-sm text-muted-foreground underline"
+              onClick={() => setCardsStep('service')}
+            >
+              ← Back to Service Selection
+            </button>
+          </>
         )}
       </div>
     );
