@@ -14,7 +14,7 @@ interface ProfileBlockProps {
 }
 
 export default function ProfileBlock({ block, theme }: ProfileBlockProps) {
-  const [imageError, setImageError] = useState(false);
+  // Removed imageError logic for more forgiving image handling
   const [isHovered, setIsHovered] = useState(false);
   
   const content = block.content || {};
@@ -107,7 +107,7 @@ export default function ProfileBlock({ block, theme }: ProfileBlockProps) {
           style={{
             width: size.container,
             height: size.container,
-            backgroundColor: imageError || !avatarUrl ? `${accentColor}15` : 'transparent',
+            backgroundColor: !avatarUrl ? `${accentColor}15` : 'transparent',
             ...getBorderStyle(),
           }}
         >
@@ -121,7 +121,7 @@ export default function ProfileBlock({ block, theme }: ProfileBlockProps) {
             />
           )}
           
-          {avatarUrl && !imageError ? (
+          {avatarUrl ? (
             <img
               src={withImageParams(avatarUrl, 'fm=webp&w=128')}
               srcSet={`
@@ -133,7 +133,6 @@ export default function ProfileBlock({ block, theme }: ProfileBlockProps) {
               alt={name}
               className="w-full h-full object-cover"
               loading="lazy"
-              onError={() => setImageError(true)}
             />
           ) : (
             <User 
