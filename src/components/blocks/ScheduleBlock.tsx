@@ -1,5 +1,3 @@
-  // Notice hours: minimum hours in advance required to book
-  const noticeHours = (content.noticeHours as number) || 0;
 
 import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
@@ -121,8 +119,8 @@ export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
   const subtitle = (content.subtitle as string) || 'Select a time that works for you';
   const calendlyUrl = content.calendlyUrl as string;
   const style = (content.style as 'calendar' | 'list' | 'minimal' | 'embedded' | 'cards') || 'calendar';
-  
-  // Services
+  // Minimum notice: hours in advance required to book (from editor)
+  const noticeHours = (content.minNotice as number) || 0;
   const services: ServiceType[] = useMemo(() => (content.services as ServiceType[]) || [
     { id: '1', name: '30-Minute Consultation', duration: 30, price: 0, icon: 'video', description: 'Quick intro call', calendarType: 'google' },
     { id: '2', name: '1-Hour Strategy Session', duration: 60, price: 99, icon: 'zoom', description: 'Deep dive into your needs', requiresPayment: true, calendarType: 'google' },
