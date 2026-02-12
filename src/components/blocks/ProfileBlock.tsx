@@ -123,8 +123,15 @@ export default function ProfileBlock({ block, theme }: ProfileBlockProps) {
           {avatarUrl && !imageError ? (
             <img
               src={avatarUrl}
+              srcSet={`
+                ${avatarUrl}&fm=webp&w=64 64w,
+                ${avatarUrl}&fm=webp&w=128 128w,
+                ${avatarUrl}&fm=webp&w=256 256w
+              `}
+              sizes="(max-width: 600px) 64px, (max-width: 900px) 128px, 256px"
               alt={name}
               className="w-full h-full object-cover"
+              loading="lazy"
               onError={() => setImageError(true)}
             />
           ) : (

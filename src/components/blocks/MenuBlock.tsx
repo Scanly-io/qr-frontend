@@ -258,9 +258,16 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
                 whileHover={{ scale: 1.05 }}
               >
                 <img 
-                  src={item.image} 
+                  src={item.image}
+                  srcSet={`
+                    ${item.image}&fm=webp&w=200 200w,
+                    ${item.image}&fm=webp&w=400 400w,
+                    ${item.image}&fm=webp&w=800 800w
+                  `}
+                  sizes="(max-width: 600px) 200px, (max-width: 900px) 400px, 800px"
                   alt={item.name}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </motion.div>
             )}

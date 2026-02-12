@@ -231,7 +231,7 @@ export default function ShopBlock({
       });
       
       if (response.checkoutUrl) {
-        window.location.href = response.checkoutUrl;
+        window.location.assign(response.checkoutUrl);
       }
     } catch (error) {
       console.error('Checkout error:', error);

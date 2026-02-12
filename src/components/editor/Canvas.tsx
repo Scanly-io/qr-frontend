@@ -10,28 +10,31 @@ import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { PRESET_THEMES } from '@/types/theme';
 import { getBackgroundStyle } from '@/utils/patterns';
-import ProfileBlock from '@/components/blocks/ProfileBlock';
-import LinkButtonBlock from '@/components/blocks/LinkButtonBlock';
-import SocialLinksBlock from '@/components/blocks/SocialLinksBlock';
-import HeaderBlock from '@/components/blocks/HeaderBlock';
-import FooterBlock from '@/components/blocks/FooterBlock';
-import HeroBlockComponent from '@/components/blocks/HeroBlock';
-import StatsBlockComponent from '@/components/blocks/StatsBlock';
-import FeaturesBlockComponent from '@/components/blocks/FeaturesBlock';
-import FAQBlockComponent from '@/components/blocks/FAQBlock';
-import TestimonialBlockComponent from '@/components/blocks/TestimonialBlock';
-import CountdownBlockComponent from '@/components/blocks/CountdownBlock';
-import EventsBlockComponent from '@/components/blocks/EventsBlock';
-import PaymentBlockComponent from '@/components/blocks/PaymentBlock';
-import ProductBlockComponent from '@/components/blocks/ProductBlock';
-import ShopBlockComponent from '@/components/blocks/ShopBlock';
-import RealEstateBlockComponent from '@/components/blocks/RealEstateBlock';
-import MenuBlockComponent from '@/components/blocks/MenuBlock';
-import ArtistBlockComponent from '@/components/blocks/ArtistBlock';
-import DealsBlockComponent from '@/components/blocks/DealsBlock';
-import ScheduleBlockComponent from '@/components/blocks/ScheduleBlock';
-import MapBlockComponent from '@/components/blocks/MapBlock';
-import PricingBlockComponent from '@/components/blocks/PricingBlock';
+import { Suspense, lazy } from 'react';
+
+// Dynamic block imports
+const ProfileBlock = lazy(() => import('@/components/blocks/ProfileBlock'));
+const LinkButtonBlock = lazy(() => import('@/components/blocks/LinkButtonBlock'));
+const SocialLinksBlock = lazy(() => import('@/components/blocks/SocialLinksBlock'));
+const HeaderBlock = lazy(() => import('@/components/blocks/HeaderBlock'));
+const FooterBlock = lazy(() => import('@/components/blocks/FooterBlock'));
+const HeroBlockComponent = lazy(() => import('@/components/blocks/HeroBlock'));
+const StatsBlockComponent = lazy(() => import('@/components/blocks/StatsBlock'));
+const FeaturesBlockComponent = lazy(() => import('@/components/blocks/FeaturesBlock'));
+const FAQBlockComponent = lazy(() => import('@/components/blocks/FAQBlock'));
+const TestimonialBlockComponent = lazy(() => import('@/components/blocks/TestimonialBlock'));
+const CountdownBlockComponent = lazy(() => import('@/components/blocks/CountdownBlock'));
+const EventsBlockComponent = lazy(() => import('@/components/blocks/EventsBlock'));
+const PaymentBlockComponent = lazy(() => import('@/components/blocks/PaymentBlock'));
+const ProductBlockComponent = lazy(() => import('@/components/blocks/ProductBlock'));
+const ShopBlockComponent = lazy(() => import('@/components/blocks/ShopBlock'));
+const RealEstateBlockComponent = lazy(() => import('@/components/blocks/RealEstateBlock'));
+const MenuBlockComponent = lazy(() => import('@/components/blocks/MenuBlock'));
+const ArtistBlockComponent = lazy(() => import('@/components/blocks/ArtistBlock'));
+const DealsBlockComponent = lazy(() => import('@/components/blocks/DealsBlock'));
+const ScheduleBlockComponent = lazy(() => import('@/components/blocks/ScheduleBlock'));
+const MapBlockComponent = lazy(() => import('@/components/blocks/MapBlock'));
+const PricingBlockComponent = lazy(() => import('@/components/blocks/PricingBlock'));
 import { CartSystem } from '@/components/cart';
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { getBlockColorPalette, getLightTint, createGradient } from '@/lib/utils';
@@ -694,34 +697,44 @@ function SortableBlock({
     
     switch (block.type) {
       case 'profile': {
-        // Linktree-style profile block
-        return <ProfileBlock block={block} isEditing={false} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 60 }}>Loading...</div>}>
+            <ProfileBlock block={block} isEditing={false} theme={theme} />
+          </Suspense>
+        );
       }
-      
       case 'linkButton': {
-        // Linktree-style link button
-        return <LinkButtonBlock block={block} isEditing={false} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <LinkButtonBlock block={block} isEditing={false} theme={theme} />
+          </Suspense>
+        );
       }
-
       case 'header': {
-        // Page header block
-        return <HeaderBlock block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <HeaderBlock block={block} theme={theme} />
+          </Suspense>
+        );
       }
-
       case 'footer': {
-        // Page footer block
-        return <FooterBlock block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <FooterBlock block={block} theme={theme} />
+          </Suspense>
+        );
       }
-      
       case 'social': {
-        // Use the new SocialLinksBlock component
-        // Pass isEditing=true when block is selected to show the edit UI
         const handleSocialUpdate = (updates: Partial<Block>) => {
           if (onBlockUpdate) {
             onBlockUpdate(block.id, updates);
           }
         };
-        return <SocialLinksBlock block={block} isEditing={isSelected} onUpdate={handleSocialUpdate} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <SocialLinksBlock block={block} isEditing={isSelected} onUpdate={handleSocialUpdate} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'heading': {
@@ -1908,7 +1921,6 @@ function SortableBlock({
       case 'countdown': {
         // Countdown timer block - live updating timer
         if (!block.content.targetDate) {
-          // Show setup message if no target date
           return (
             <div className="text-center p-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg cursor-pointer">
               <p className="text-lg font-semibold text-yellow-800">⏰ Countdown Timer</p>
@@ -1918,79 +1930,151 @@ function SortableBlock({
             </div>
           );
         }
-        return <CountdownBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <CountdownBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
 
       case 'calendar': {
         // Events Calendar block
-        return <EventsBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <EventsBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'testimonial': {
-        return <TestimonialBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <TestimonialBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'faq': {
         // FAQ block - using imported component
-        return <FAQBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <FAQBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'gallery': {
         // Gallery block with lightbox & animations
-        return <GalleryBlock block={block} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <GalleryBlock block={block} />
+          </Suspense>
+        );
       }
       
       case 'pricing': {
         // Pricing table block with toggle
-        return <PricingBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <PricingBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'features': {
-        return <FeaturesBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <FeaturesBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'stats': {
-        return <StatsBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <StatsBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'map': {
-        return <MapBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <MapBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'hero': {
-        return <HeroBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <HeroBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'payment': {
-        return <PaymentBlockComponent block={block} isEditing={!isPreview} theme={theme} micrositeId={micrositeId} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <PaymentBlockComponent block={block} isEditing={!isPreview} theme={theme} micrositeId={micrositeId} />
+          </Suspense>
+        );
       }
       
       case 'product': {
-        return <ProductBlockComponent block={block} isEditing={!isPreview} theme={theme} micrositeId={micrositeId} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <ProductBlockComponent block={block} isEditing={!isPreview} theme={theme} micrositeId={micrositeId} />
+          </Suspense>
+        );
       }
       
       case 'shop': {
-        return <ShopBlockComponent block={block} isEditing={!isPreview} theme={theme} micrositeId={micrositeId} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <ShopBlockComponent block={block} isEditing={!isPreview} theme={theme} micrositeId={micrositeId} />
+          </Suspense>
+        );
       }
       
       case 'real-estate': {
-        return <RealEstateBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <RealEstateBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'menu': {
-        return <MenuBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <MenuBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'artist': {
-        return <ArtistBlockComponent block={block} theme={theme} micrositeId={micrositeId} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <ArtistBlockComponent block={block} theme={theme} micrositeId={micrositeId} />
+          </Suspense>
+        );
       }
       
       case 'deals': {
-        return <DealsBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <DealsBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       case 'schedule': {
-        return <ScheduleBlockComponent block={block} theme={theme} />;
+        return (
+          <Suspense fallback={<div style={{ minHeight: 40 }}>Loading...</div>}>
+            <ScheduleBlockComponent block={block} theme={theme} />
+          </Suspense>
+        );
       }
       
       default:

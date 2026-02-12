@@ -228,8 +228,15 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
               <motion.img
                 key={currentImg}
                 src={property.images[currentImg]}
+                srcSet={`
+                  ${property.images[currentImg]}&fm=webp&w=400 400w,
+                  ${property.images[currentImg]}&fm=webp&w=800 800w,
+                  ${property.images[currentImg]}&fm=webp&w=1200 1200w
+                `}
+                sizes="(max-width: 600px) 400px, (max-width: 900px) 800px, 1200px"
                 alt={property.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
