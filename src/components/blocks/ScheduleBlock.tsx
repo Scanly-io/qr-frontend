@@ -1,3 +1,6 @@
+  // Notice hours: minimum hours in advance required to book
+  const noticeHours = (content.noticeHours as number) || 0;
+
 import type { Block } from '@/types';
 import type { PageTheme } from '@/types/theme';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -151,11 +154,17 @@ export default function ScheduleBlock({ block, theme }: ScheduleBlockProps) {
     const end = new Date();
     end.setHours(endHour, endMin, 0, 0);
   const current = new Date(start);
+    const now = new Date();
     while (current < end) {
       const timeStr = `${current.getHours().toString().padStart(2, '0')}:${current.getMinutes().toString().padStart(2, '0')}`;
+      // Calculate if slot is within notice period
+      const slotDate = new Date(current);
+      const diffMs = slotDate.getTime() - now.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+      const isTooSoon = noticeHours > 0 && diffHours < noticeHours;
       slots.push({
         time: timeStr,
-        available: !customUnavailable.includes(timeStr),
+        available: !customUnavailable.includes(timeStr) && !isTooSoon,
         duration: slotDuration,
       });
       current.setMinutes(current.getMinutes() + slotDuration + bufferTime);

@@ -7187,11 +7187,11 @@ function MenuEditor({ block, updateContent, pageTheme }: {
                     />
                   </div>
 
-                  <TextField
-                    label="Image URL"
+                  {/* Image upload for menu item */}
+                  <ImageField
+                    label="Menu Item Image"
                     value={item.image || ''}
                     onChange={(v) => updateMenuItem(idx, { image: v })}
-                    placeholder="https://..."
                   />
 
                   <TextField
@@ -7705,6 +7705,13 @@ function RealEstateEditor({ block, updateContent, updateStyle: _updateStyle, pag
                           </button>
                         </div>
                       ))}
+                      <div className="col-span-3">
+                        <ImageField
+                          label="Add Property Image"
+                          value={''}
+                          onChange={(v) => addPropertyImage(idx, v)}
+                        />
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <input
@@ -7789,14 +7796,13 @@ function RealEstateEditor({ block, updateContent, updateStyle: _updateStyle, pag
                       placeholder="+1 (555) 123-4567"
                       type="tel"
                     />
-                    <TextField
-                      label="Agent Photo URL"
+                    {/* Agent photo upload */}
+                    <ImageField
+                      label="Agent Photo"
                       value={property.agent?.photo || ''}
                       onChange={(v) => updateProperty(idx, { 
                         agent: { ...property.agent, name: property.agent?.name || 'Agent', photo: v } 
                       })}
-                      placeholder="https://..."
-                      type="url"
                     />
                     {property.agent?.photo && (
                       <div className="mt-2">
@@ -8259,12 +8265,11 @@ function ArtistEditor({ block, updateContent, pageTheme }: {
           onChange={(v) => updateContent('artistName', v)}
           placeholder="Your name or stage name"
         />
-        <TextField
-          label="Artist Image URL"
-          value={(block.content.artistImage as string) || ''}
-          onChange={(v) => updateContent('artistImage', v)}
-          placeholder="https://..."
-        />
+        <ImageField
+            label="Artist Image"
+            value={(block.content.artistImage as string) || ''}
+            onChange={(v) => updateContent('artistImage', v)}
+          />
         <TextField
           label="Bio"
           value={(block.content.bio as string) || ''}
@@ -8454,11 +8459,11 @@ function ArtistEditor({ block, updateContent, pageTheme }: {
                       onChange={(v) => updateArtwork(idx, { title: v })}
                       placeholder="Artwork name"
                     />
-                    <TextField
-                      label="Image URL"
+                    {/* Image upload for artwork */}
+                    <ImageField
+                      label="Artwork Image"
                       value={artwork.image || ''}
                       onChange={(v) => updateArtwork(idx, { image: v })}
-                      placeholder="https://..."
                     />
                     <TextField
                       label="Description"
