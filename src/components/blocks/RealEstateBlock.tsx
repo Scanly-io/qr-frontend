@@ -15,6 +15,7 @@ import {
   getCardStyles
 } from '../../utils/designSystem';
 import { trackCTA } from '@/utils/trackCTA';
+import { withImageParams } from '@/utils/imageUrl';
 
 interface RealEstateBlockProps {
   block: Block;
@@ -68,37 +69,50 @@ function formatPrice(price: string | number): string {
   }).format(price);
 }
 
-export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) {
-  const properties = (block.content.properties as PropertyItem[]) || [
-    {
-      title: 'Modern Luxury Villa',
-      address: '123 Palm Beach Drive, Miami, FL',
-      price: 2500000,
-      priceLabel: 'For Sale',
-      status: 'available',
-      type: 'house',
-      images: [
-        'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800',
-        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
-        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800',
-      ],
-      bedrooms: 5,
-      bathrooms: 4,
-      sqft: 4500,
-      parking: 3,
-      yearBuilt: 2022,
-      description: 'Stunning modern villa with ocean views, featuring an infinity pool, smart home technology, and premium finishes throughout.',
-      features: ['Pool', 'Ocean View', 'Smart Home', 'Wine Cellar', 'Home Theater'],
-      agent: {
-        name: 'Sarah Johnson',
-        phone: '+1 (555) 123-4567',
-        email: 'sarah@realestate.com',
-      },
-      featured: true,
-    },
-  ];
+import { useMemo } from 'react';
 
-  const [currentImageIndex, setCurrentImageIndex] = useState<Record<number, number>>({});
+export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) {
+  const properties = useMemo(() => {
+    return (block.content.properties as PropertyItem[]) || [
+      {
+        title: 'Modern Luxury Villa',
+        address: '123 Palm Beach Drive, Miami, FL',
+        price: 2500000,
+        priceLabel: 'For Sale',
+        status: 'available',
+        type: 'house',
+        images: [
+          'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800',
+          'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
+          'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800',
+        ],
+        bedrooms: 5,
+        bathrooms: 4,
+        sqft: 4500,
+        parking: 3,
+        yearBuilt: 2022,
+        description: 'Stunning modern villa with ocean views, featuring an infinity pool, smart home technology, and premium finishes throughout.',
+        features: ['Pool', 'Ocean View', 'Smart Home', 'Wine Cellar', 'Home Theater'],
+        agent: {
+          name: 'Sarah Johnson',
+          phone: '+1 (555) 123-4567',
+          email: 'sarah@realestate.com',
+        },
+        featured: true,
+      },
+    ];
+  }, [block.content.properties]);
+
+  const initialImageIndex = useMemo(() => {
+    const initial: Record<number, number> = {};
+    properties.forEach((_, idx) => {
+      initial[idx] = 0;
+    });
+    return initial;
+  }, [properties]);
+  const [currentImageIndex, setCurrentImageIndex] = useState<Record<number, number>>(initialImageIndex);
+  // Track image load errors for each property
+  const [imageError, setImageError] = useState<Record<number, boolean>>({});
   const [likedProperties, setLikedProperties] = useState<Set<number>>(new Set());
   const [hoveredProperty, setHoveredProperty] = useState<number | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
@@ -227,12 +241,20 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
             <div className="relative aspect-[4/3] overflow-hidden">
               <motion.img
                 key={currentImg}
-                src={property.images[currentImg]}
-                srcSet={`
-                  ${property.images[currentImg]}&fm=webp&w=400 400w,
-                  ${property.images[currentImg]}&fm=webp&w=800 800w,
-                  ${property.images[currentImg]}&fm=webp&w=1200 1200w
-                `}
+                src={
+                  property.images[currentImg] && !imageError[index]
+                    ? withImageParams(property.images[currentImg], 'fm=webp&w=800')
+                    : undefined
+                }
+                srcSet={
+                  property.images[currentImg] && !imageError[index]
+                    ? `
+                        ${withImageParams(property.images[currentImg], 'fm=webp&w=400')} 400w,
+                        ${withImageParams(property.images[currentImg], 'fm=webp&w=800')} 800w,
+                        ${withImageParams(property.images[currentImg], 'fm=webp&w=1200')} 1200w
+                      `
+                    : undefined
+                }
                 sizes="(max-width: 600px) 400px, (max-width: 900px) 800px, 1200px"
                 alt={property.title}
                 className="w-full h-full object-cover"
@@ -240,10 +262,17 @@ export default function RealEstateBlock({ block, theme }: RealEstateBlockProps) 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
+                onError={() => setImageError(prev => ({ ...prev, [index]: true }))}
               />
-              
+              {/* Fallback for broken/missing image */}
+              {(!property.images[currentImg] || imageError[index]) && (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-lg font-bold">
+                  Image unavailable
+                </div>
+              )}
+
               {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               
               {/* Image navigation */}
               {property.images.length > 1 && (

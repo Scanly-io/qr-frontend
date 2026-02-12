@@ -19,6 +19,7 @@ import {
 import { FONT_FAMILY_MAP } from '@/lib/fonts';
 import { usePayment } from '@/contexts/PaymentContext';
 import { trackCTA } from '@/utils/trackCTA';
+import { withImageParams } from '@/utils/imageUrl';
 
 interface MenuBlockProps {
   block: Block;
@@ -258,11 +259,11 @@ export default function MenuBlock({ block, theme }: MenuBlockProps) {
                 whileHover={{ scale: 1.05 }}
               >
                 <img 
-                  src={item.image}
+                  src={withImageParams(item.image, 'fm=webp&w=128')}
                   srcSet={`
-                    ${item.image}&fm=webp&w=64 64w,
-                    ${item.image}&fm=webp&w=128 128w,
-                    ${item.image}&fm=webp&w=256 256w
+                    ${withImageParams(item.image, 'fm=webp&w=64')} 64w,
+                    ${withImageParams(item.image, 'fm=webp&w=128')} 128w,
+                    ${withImageParams(item.image, 'fm=webp&w=256')} 256w
                   `}
                   sizes="(max-width: 600px) 64px, (max-width: 900px) 128px, 256px"
                   alt={item.name}

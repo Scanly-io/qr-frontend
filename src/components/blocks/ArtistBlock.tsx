@@ -17,6 +17,7 @@ import {
 import { usePayment } from '@/contexts/PaymentContext';
 import { useAuthStore } from '@/store/authStore';
 import { trackCTA } from '@/utils/trackCTA';
+import { withImageParams } from '@/utils/imageUrl';
 
 interface ArtistBlockProps {
   block: Block;
@@ -196,11 +197,11 @@ export default function ArtistBlock({ block, theme, micrositeId }: ArtistBlockPr
             {/* Album Art */}
             <div className="w-full aspect-square relative">
               <img 
-                src={displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400'}
+                src={withImageParams(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400', 'fm=webp&w=400')}
                 srcSet={`
-                  ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400')}&fm=webp&w=200 200w,
-                  ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400')}&fm=webp&w=400 400w,
-                  ${(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400')}&fm=webp&w=800 800w
+                  ${withImageParams(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400', 'fm=webp&w=200')} 200w,
+                  ${withImageParams(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400', 'fm=webp&w=400')} 400w,
+                  ${withImageParams(displayTracks[currentTrack]?.coverArt || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400', 'fm=webp&w=800')} 800w
                 `}
                 sizes="(max-width: 600px) 200px, (max-width: 900px) 400px, 800px"
                 alt={displayTracks[currentTrack]?.title}
